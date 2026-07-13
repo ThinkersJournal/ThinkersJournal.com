@@ -17,7 +17,7 @@ export const OFFERINGS: { num: string; title: string; desc: string; soon?: boole
   { num: '02', title: 'Pairing', desc: "A partner who gets it — matched to your niche, so you're never stuck building alone." },
   { num: '03', title: 'Standards, held in trust', desc: "We steward open standards like KISS so individual thinkers don't have to carry them alone." },
   { num: '04', title: 'Tooling & infrastructure', desc: 'The workshop — hosting for code, docs, and running services so your idea can actually ship.' },
-  { num: '05', title: 'The Community', desc: 'Where your work comes alive — document what you're building with living, precise links others can act on.', soon: true },
+  { num: '05', title: 'The Community', desc: "Where your work comes alive — document what you're building with living, precise links others can act on.", soon: true },
 ];
 
 // NOTE: replace href handles with the real accounts once created.
