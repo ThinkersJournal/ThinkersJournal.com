@@ -7,6 +7,7 @@ interface Props { title?: string; description?: string }
 const { title, description = SITE.description } = Astro.props;
 const fullTitle = title ? `${title} · ${SITE.title}` : `${SITE.title} — No thinker should have to build alone.`;
 const canonical = new URL(Astro.url.pathname, Astro.site).href;
+const ogImage = new URL('/og.png', Astro.site).href;
 ---
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -18,4 +19,13 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 <meta property="og:title" content={fullTitle} />
 <meta property="og:description" content={description} />
 <meta property="og:url" content={canonical} />
+<meta property="og:site_name" content={SITE.title} />
+<meta property="og:image" content={ogImage} />
+<meta property="og:image:width" content="1200" />
+<meta property="og:image:height" content="630" />
+<meta property="og:image:alt" content="Thinker's Journal — No thinker should have to build alone." />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="twitter:title" content={fullTitle} />
+<meta name="twitter:description" content={description} />
+<meta name="twitter:image" content={ogImage} />
 <meta name="theme-color" content="#060608" />

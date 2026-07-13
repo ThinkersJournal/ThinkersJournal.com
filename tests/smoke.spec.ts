@@ -12,3 +12,13 @@ test('body uses the piano-black background token', async ({ page }) => {
     getComputedStyle(document.body).backgroundColor);
   expect(bg).toBe('rgb(6, 6, 8)'); // #060608
 });
+
+test('home exposes social-share (Open Graph + Twitter) meta', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('meta[property="og:image"]'))
+    .toHaveAttribute('content', /\/og\.png$/);
+  await expect(page.locator('meta[property="og:image:width"]'))
+    .toHaveAttribute('content', '1200');
+  await expect(page.locator('meta[name="twitter:card"]'))
+    .toHaveAttribute('content', 'summary_large_image');
+});
