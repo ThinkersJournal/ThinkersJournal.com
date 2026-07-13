@@ -28,3 +28,19 @@ test('page has exactly one banner, main, and contentinfo landmark', async ({ pag
   await expect(page.getByRole('main')).toHaveCount(1);
   await expect(page.getByRole('contentinfo')).toHaveCount(1);
 });
+
+test('mobile: primary nav collapses into a toggle menu', async ({ page }) => {
+  await page.setViewportSize({ width: 375, height: 800 });
+  await page.goto('/');
+  const nav = page.getByRole('navigation', { name: 'Primary' });
+  const mission = nav.getByRole('link', { name: 'Mission', exact: true });
+  const burger = page.locator('label.burger');
+
+  // Burger visible; links collapsed (not reachable) until opened.
+  await expect(burger).toBeVisible();
+  await expect(mission).toBeHidden();
+
+  // Opening the menu reveals the links.
+  await burger.click();
+  await expect(mission).toBeVisible();
+});
