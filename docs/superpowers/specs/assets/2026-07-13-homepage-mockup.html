@@ -1,0 +1,270 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Homepage layout — Thinker's Journal</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,ital,wght@9..144,0,400;9..144,0,500;9..144,0,600;9..144,1,500&family=Inter:wght@400;450;500;600&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#060608;
+    --ink2:#0a0a0d;
+    --green:#3dff95;
+    --green-bright:#7dffbc;
+    --green-glow:rgba(61,255,149,.5);
+    --serif:'Fraunces',Georgia,serif;
+    --sans:'Inter',-apple-system,'Segoe UI',system-ui,sans-serif;
+    --text:#f3f3f5;
+    --muted:#a8a8b3;
+    --dim:#7a7a85;
+    --line:rgba(255,255,255,.08);
+    --wrap:1120px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0}
+  html{scroll-behavior:smooth}
+  body{background:var(--ink);color:var(--text);font-family:var(--sans);
+    -webkit-font-smoothing:antialiased;overflow-x:hidden;line-height:1.6}
+  a{color:inherit;text-decoration:none}
+  .wrap{max-width:var(--wrap);margin:0 auto;padding:0 clamp(20px,5vw,48px)}
+  .label{font-family:var(--sans);font-size:12px;font-weight:600;letter-spacing:.24em;
+    text-transform:uppercase;color:var(--green);opacity:.95}
+  .serif{font-family:var(--serif)}
+  em{font-family:var(--serif);font-style:italic;color:var(--green-bright)}
+  .btn{display:inline-block;font-family:var(--sans);font-size:15px;font-weight:600;
+    padding:13px 26px;border-radius:999px;transition:transform .15s ease}
+  .btn:hover{transform:translateY(-2px)}
+  .btn-primary{background:var(--green);color:#03130a;box-shadow:0 8px 30px -6px var(--green-glow)}
+  .btn-ghost{background:transparent;color:var(--text);border:1px solid rgba(255,255,255,.22)}
+  .link{color:var(--green);font-weight:600;font-size:15px}
+  .link:hover{text-decoration:underline}
+
+  /* caption */
+  .cap{text-align:center;color:var(--dim);font-size:12.5px;padding:14px 18px 2px}
+  .cap b{color:var(--muted);font-weight:500}
+
+  /* NAV */
+  .nav{position:sticky;top:0;z-index:40;background:rgba(6,6,8,.72);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .nav .wrap{display:flex;align-items:center;justify-content:space-between;height:66px;gap:18px}
+  .wm{font-family:var(--serif);font-size:21px;font-weight:500;color:#fafafc}
+  .wm .dot{color:var(--green);text-shadow:0 0 14px var(--green-glow)}
+  .navlinks{display:flex;gap:26px;align-items:center;font-size:14px;color:var(--muted)}
+  .navlinks a:hover{color:var(--text)}
+  .support{font-size:13.5px;font-weight:600;color:#03130a;background:var(--green);
+    padding:9px 17px;border-radius:999px;box-shadow:0 0 20px var(--green-glow)}
+  @media(max-width:840px){.navlinks a{display:none}}
+
+  /* HERO */
+  .hero{position:relative;overflow:hidden;text-align:center;
+    background:linear-gradient(180deg,#141417 0%,#0a0a0c 42%,#060608 100%)}
+  .hero::before{content:"";position:absolute;top:0;left:0;right:0;height:180px;
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0));z-index:0}
+  .hero::after{content:"";position:absolute;inset:-25% -10% 0;z-index:0;filter:blur(70px);opacity:.8;
+    background:radial-gradient(42% 46% at 50% 26%,rgba(61,255,149,.20),transparent 70%),
+      radial-gradient(28% 30% at 50% 74%,rgba(61,255,149,.09),transparent 72%)}
+  .hero .wrap{position:relative;z-index:2;padding:clamp(64px,10vw,120px) 0 clamp(74px,9vw,104px)}
+  .hero .eyebrow{margin-bottom:24px}
+  h1{font-family:var(--serif);font-weight:500;font-size:clamp(38px,7vw,74px);
+    line-height:1.04;letter-spacing:-.015em;color:#fbfbfd}
+  .hero p.sub{font-size:clamp(16px,2.1vw,19px);color:var(--muted);max-width:60ch;margin:26px auto 0}
+  .hero .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:38px}
+  .scrollhint{position:relative;z-index:2;text-align:center;color:var(--dim);font-size:11.5px;
+    letter-spacing:.16em;text-transform:uppercase;padding-bottom:26px}
+
+  /* generic section */
+  section{padding:clamp(72px,10vw,120px) 0;border-top:1px solid var(--line)}
+  .sechead{max-width:60ch}
+  .sechead h2{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4.4vw,46px);
+    line-height:1.1;letter-spacing:-.01em;margin:16px 0 0;color:#fafafc}
+  .lead{font-size:clamp(16px,2vw,18.5px);color:var(--muted);margin-top:20px;max-width:64ch}
+
+  /* GAP */
+  .gap h2{max-width:18ch}
+  .gap .big{font-family:var(--serif);font-size:clamp(26px,3.6vw,38px);line-height:1.28;
+    color:#e9e9ee;max-width:26ch;margin-top:8px;font-weight:400}
+  .gap .body{color:var(--muted);max-width:60ch;margin-top:24px;font-size:17px}
+
+  /* OFFERINGS */
+  .offer .grid{margin-top:52px;display:grid;grid-template-columns:1fr;gap:0}
+  .row{display:grid;grid-template-columns:64px 1fr auto;gap:26px;align-items:baseline;
+    padding:26px 0;border-top:1px solid var(--line)}
+  .row:last-child{border-bottom:1px solid var(--line)}
+  .row .num{font-family:var(--serif);font-size:26px;color:var(--green);font-weight:500}
+  .row h3{font-family:var(--serif);font-size:clamp(20px,2.6vw,26px);font-weight:500;color:#fafafc}
+  .row .desc{color:var(--muted);margin-top:6px;font-size:15.5px;max-width:52ch}
+  .row .soon{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);
+    border:1px solid rgba(61,255,149,.4);border-radius:999px;padding:4px 10px;white-space:nowrap;align-self:center}
+  @media(max-width:720px){.row{grid-template-columns:44px 1fr;}.row .soon{grid-column:2;justify-self:start;margin-top:8px}}
+
+  /* KISS proof band */
+  .proof{background:var(--ink2)}
+  .proof .inner{display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+  .proof .txt{max-width:60ch}
+  .proof h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,3.6vw,38px);color:#fafafc;margin-top:14px}
+  .proof p{color:var(--muted);margin-top:16px;font-size:17px}
+
+  /* COMMUNITY teaser + post mock */
+  .comm .inner{display:grid;grid-template-columns:1.1fr .9fr;gap:54px;align-items:center}
+  @media(max-width:860px){.comm .inner{grid-template-columns:1fr;gap:34px}}
+  .comm h2{font-family:var(--serif);font-weight:500;font-size:clamp(28px,4.2vw,44px);color:#fafafc;margin-top:14px}
+  .comm p{color:var(--muted);margin-top:18px;font-size:17px;max-width:52ch}
+  .post{background:#0c0c10;border:1px solid var(--line);border-radius:16px;padding:22px;
+    box-shadow:0 30px 70px -30px rgba(0,0,0,.8)}
+  .post .who{display:flex;align-items:center;gap:11px}
+  .post .av{width:38px;height:38px;border-radius:50%;background:linear-gradient(135deg,#2a2a30,#141418);
+    border:1px solid var(--line)}
+  .post .who b{font-size:14.5px;color:#f0f0f4;font-weight:600}
+  .post .who span{font-size:12.5px;color:var(--dim);display:block;margin-top:1px}
+  .post .msg{margin-top:16px;font-size:15px;color:#dcdce2;line-height:1.66}
+  .ref{color:var(--green);border-bottom:1px dashed rgba(61,255,149,.5);cursor:pointer;font-weight:500}
+  .chip{display:inline-flex;align-items:center;gap:6px;background:rgba(61,255,149,.1);
+    border:1px solid rgba(61,255,149,.35);color:var(--green-bright);border-radius:7px;
+    padding:1px 8px;font-size:13px;font-weight:500}
+  .tip{margin-top:14px;border-top:1px dashed var(--line);padding-top:13px;display:flex;gap:10px;align-items:center}
+  .tip .k{font-size:11px;color:var(--dim)}
+  .tipcard{margin-top:10px;background:#08080b;border:1px solid var(--line);border-radius:9px;
+    padding:11px 13px;font-family:ui-monospace,'SF Mono',Consolas,monospace;font-size:12px;color:#9fbcae}
+  .tipcard .err{color:#ff9d9d}
+
+  /* FOUNDER */
+  .founder .inner{max-width:64ch}
+  .founder h2{font-family:var(--serif);font-weight:500;font-size:clamp(26px,3.8vw,40px);
+    color:#fafafc;margin-top:14px;line-height:1.14}
+  .founder p{color:var(--muted);margin-top:20px;font-size:17px}
+  .founder .sign{font-family:var(--serif);font-style:italic;color:#d6d6dc;margin-top:22px;font-size:18px}
+
+  /* JOIN / SUPPORT */
+  .join{text-align:center;background:
+    radial-gradient(60% 120% at 50% 0%,rgba(61,255,149,.08),transparent 60%),var(--ink)}
+  .join h2{font-family:var(--serif);font-weight:500;font-size:clamp(30px,5vw,52px);color:#fbfbfd;line-height:1.08}
+  .join p{color:var(--muted);max-width:52ch;margin:20px auto 0;font-size:18px}
+  .join .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+
+  /* FOOTER */
+  footer{background:#040405;border-top:1px solid var(--line);padding:64px 0 40px}
+  .fgrid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:34px}
+  @media(max-width:760px){.fgrid{grid-template-columns:1fr 1fr}}
+  .fcol h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+  .fcol a{display:block;color:var(--muted);font-size:14.5px;padding:5px 0}
+  .fcol a:hover{color:var(--text)}
+  .fbrand .wm{font-size:20px}
+  .fbrand p{color:var(--dim);font-size:14px;margin-top:12px;max-width:34ch}
+  .fnote{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--dim);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .fnote .green{color:var(--green)}
+</style>
+</head>
+<body>
+  <div class="cap"><b>Full homepage layout</b> — the whole narrative in the locked look. Scroll it. Real copy you can edit; tell me what to change per section.</div>
+
+  <!-- NAV -->
+  <div class="nav"><div class="wrap">
+    <div class="wm">Thinker's Journal<span class="dot">.</span></div>
+    <div class="navlinks">
+      <a>Mission</a><a>What We Offer</a><a>Standards</a><a>Dispatches</a>
+      <a class="support">Support</a>
+    </div>
+  </div></div>
+
+  <!-- HERO -->
+  <div class="hero">
+    <div class="wrap">
+      <div class="label eyebrow">A home for thinkers</div>
+      <h1>No thinker should<br>have to build <em>alone.</em></h1>
+      <p class="sub">Everyone has an idea worth building — and no way to build it alone. Thinker's Journal gives makers of every kind a mentor who's been there, a partner who gets it, and the tools to bring what's in their heads into the world. Freely, or as close to free as we can make it.</p>
+      <div class="cta">
+        <a class="btn btn-primary">Explore the mission</a>
+        <a class="btn btn-ghost">Support the mission</a>
+      </div>
+    </div>
+    <div class="scrollhint">scroll — the gap ↓</div>
+  </div>
+
+  <!-- THE GAP -->
+  <section class="gap"><div class="wrap sechead">
+    <div class="label">The gap</div>
+    <h2>Most ideas never get built.</h2>
+    <p class="big">Not because they weren't good enough.</p>
+    <p class="body">But because building alone is brutal. The mentor you couldn't find. The tool you couldn't afford. The bug that beat you at 2 a.m. with no one to ask. Somewhere, quietly, a better version of something just… stops. Thinker's Journal exists to close that gap — to stand beside thinkers so the idea makes it out into the world.</p>
+  </div></section>
+
+  <!-- WHAT WE OFFER -->
+  <section class="offer"><div class="wrap">
+    <div class="sechead">
+      <div class="label">What we offer</div>
+      <h2>Five ways we help you build.</h2>
+    </div>
+    <div class="grid">
+      <div class="row"><div class="num">01</div><div><h3>Mentorship</h3><div class="desc">A hand that's been there — an experienced guide to think through the hard parts with you.</div></div></div>
+      <div class="row"><div class="num">02</div><div><h3>Pairing</h3><div class="desc">A partner who gets it — matched to your niche, so you're never stuck building alone.</div></div></div>
+      <div class="row"><div class="num">03</div><div><h3>Standards, held in trust</h3><div class="desc">We steward open standards like KISS so individual thinkers don't have to carry them alone.</div></div></div>
+      <div class="row"><div class="num">04</div><div><h3>Tooling &amp; infrastructure</h3><div class="desc">The workshop — hosting for code, docs, and running services so your idea can actually ship.</div></div></div>
+      <div class="row"><div class="num">05</div><div><h3>The Community</h3><div class="desc">Where your work comes alive — document what you're building with living, precise links others can act on.</div></div><div class="soon">Coming</div></div>
+    </div>
+  </div></section>
+
+  <!-- KISS PROOF -->
+  <section class="proof"><div class="wrap inner">
+    <div class="txt">
+      <div class="label">Already in motion</div>
+      <h2>We don't just talk about standards. We steward them.</h2>
+      <p><strong style="color:#e9e9ee">KISS — the Kernel Interface Standards Suite</strong> — is the first set of standards we hold in trust: open, shared, and cared for so no single thinker has to carry them alone. It's proof the mission is already real.</p>
+    </div>
+    <a class="link">See the standards →</a>
+  </div></section>
+
+  <!-- COMMUNITY TEASER -->
+  <section class="comm"><div class="wrap inner">
+    <div>
+      <div class="label">The Community</div>
+      <h2>Soon: a place where your work comes alive.</h2>
+      <p>Post about a bug and link the <em>exact</em> file, the exact lines, and the exact error — so a mentor can hover to see it, and click to jump in and help. Not "help, it's broken." Help, it's broken <em>right here.</em></p>
+      <p style="margin-top:22px"><a class="link">See what we're building →</a></p>
+    </div>
+    <div class="post">
+      <div class="who"><div class="av"></div><div><b>maya_builds</b><span>2 hours ago · stuck on a deploy</span></div></div>
+      <div class="msg">Been fighting this for hours. The build passes locally but CI keeps failing on <span class="chip">📄 auth/session.rs : 42–58</span> — pretty sure it's this <span class="ref">@CI error</span>. Anyone free to take a look?</div>
+      <div class="tip"><span class="k">▸ hovering <b style="color:var(--green)">@CI&nbsp;error</b></span></div>
+      <div class="tipcard"><span class="err">error[E0499]</span>: cannot borrow `session` as mutable more than once<br>&nbsp;&nbsp;→ auth/session.rs:51 · <span style="color:var(--dim)">CI run #218 · click to open</span></div>
+    </div>
+  </div></section>
+
+  <!-- FOUNDER -->
+  <section class="founder"><div class="wrap inner">
+    <div class="label">Who's behind it</div>
+    <h2>One programmer, forty-four years in — and a mission too big to keep to himself.</h2>
+    <p>Here's the honest truth: there's no funding yet, and no team yet. Just conviction — a belief, earned over a long career, that far too many good ideas die for lack of a little help. Thinker's Journal is being built in the open, one piece at a time.</p>
+    <p>If any of this moves you, there's room for you here — as a mentor, a builder, a supporter, or simply someone who believes thinkers shouldn't have to go it alone.</p>
+    <div class="sign">— the founder</div>
+  </div></section>
+
+  <!-- JOIN / SUPPORT -->
+  <section class="join"><div class="wrap">
+    <h2>Be part of the reason<br>no thinker builds alone.</h2>
+    <p>Thinker's Journal is built by people who believe in it. Join the mission, or help keep it alive — every bit of either moves us forward.</p>
+    <div class="cta">
+      <a class="btn btn-primary">Join the mission</a>
+      <a class="btn btn-ghost">Support the mission</a>
+    </div>
+  </div></section>
+
+  <!-- FOOTER -->
+  <footer><div class="wrap">
+    <div class="fgrid">
+      <div class="fcol fbrand">
+        <div class="wm">Thinker's Journal<span class="dot">.</span></div>
+        <p>Helping thinkers of every kind design, build, and ship the things they're thinking about.</p>
+      </div>
+      <div class="fcol"><h4>Explore</h4><a>Mission</a><a>What We Offer</a><a>Standards</a><a>The Community</a><a>Dispatches</a></div>
+      <div class="fcol"><h4>Get involved</h4><a>Volunteer</a><a>Become a mentor</a><a>Contribute to KISS</a><a>Contact</a></div>
+      <div class="fcol"><h4>Support</h4><a>Open Collective</a><a>GitHub Sponsors</a><a>Ko-fi</a><a>More ways to give →</a></div>
+    </div>
+    <div class="fnote">
+      <span>Thinker's Journal is a non-profit in formation. <span class="green">Free, at cost, or below market — always.</span></span>
+      <span>© 2026 · github.com/thinkersjournal</span>
+    </div>
+  </div></footer>
+</body>
+</html>
