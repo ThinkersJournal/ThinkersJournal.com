@@ -1,10 +1,8 @@
 ---
-import '@fontsource-variable/fraunces';
-import '@fontsource-variable/inter';
-import '../styles/global.css';
-import Wordmark from '../components/Wordmark.astro';
+import BaseLayout from '../layouts/BaseLayout.astro';
 ---
-<html lang="en">
-  <head><meta charset="utf-8" /><title>Thinker's Journal</title></head>
-  <body><h1 data-testid="placeholder"><Wordmark /></h1></body>
-</html>
+<BaseLayout>
+  <section class="wrap" style="padding:80px 0">
+    <h1 data-testid="placeholder">Thinker's Journal</h1>
+  </section>
+</BaseLayout>

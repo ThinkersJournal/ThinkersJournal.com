@@ -1,0 +1,47 @@
+---
+import { NAV, SUPPORT } from '../consts';
+import Wordmark from './Wordmark.astro';
+---
+<footer class="ft">
+  <div class="wrap grid">
+    <div class="brand">
+      <Wordmark size="20px" />
+      <p>Helping thinkers of every kind design, build, and ship the things they're thinking about.</p>
+    </div>
+    <div class="col">
+      <h4>Explore</h4>
+      <a href="/mission">Mission</a>
+      <a href="/offerings">What We Offer</a>
+      <a href="/standards">Standards</a>
+      <a href="/community">The Community</a>
+      <a href="/dispatches">Dispatches</a>
+    </div>
+    <div class="col">
+      <h4>Get involved</h4>
+      <a href="/get-involved">Volunteer</a>
+      <a href="/get-involved#mentor">Become a mentor</a>
+      <a href="/standards">Contribute to KISS</a>
+    </div>
+    <div class="col">
+      <h4>Support</h4>
+      {SUPPORT.map((s) => <a href={s.href}>{s.label}</a>)}
+      <a href="/support">More ways to give →</a>
+    </div>
+  </div>
+  <div class="wrap note">
+    <span>Thinker's Journal is a non-profit in formation. <span class="green">Free, at cost, or below market — always.</span></span>
+    <span>github.com/thinkersjournal</span>
+  </div>
+</footer>
+<style>
+  .ft{background:#040405;border-top:1px solid var(--line);padding:64px 0 40px;margin-top:0}
+  .grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:34px}
+  @media(max-width:760px){.grid{grid-template-columns:1fr 1fr}}
+  .brand p{color:var(--dim);font-size:14px;margin-top:12px;max-width:34ch}
+  .col h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+  .col a{display:block;color:var(--muted);font-size:14.5px;padding:5px 0}
+  .col a:hover{color:var(--text)}
+  .note{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);
+    color:var(--dim);font-size:13px;display:flex;justify-content:space-between;flex-wrap:wrap;gap:12px}
+  .note .green{color:var(--green)}
+</style>

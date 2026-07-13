@@ -1,0 +1,23 @@
+---
+import { NAV } from '../consts';
+import Wordmark from './Wordmark.astro';
+---
+<header class="nav">
+  <div class="wrap bar">
+    <a href="/" aria-label="Thinker's Journal home"><Wordmark /></a>
+    <nav class="links" aria-label="Primary">
+      {NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+      <a href="/support" class="support">Support</a>
+    </nav>
+  </div>
+</header>
+<style>
+  .nav{position:sticky;top:0;z-index:40;background:rgba(6,6,8,.72);
+    backdrop-filter:blur(12px);border-bottom:1px solid var(--line)}
+  .bar{display:flex;align-items:center;justify-content:space-between;height:66px;gap:18px}
+  .links{display:flex;gap:26px;align-items:center;font-size:14px;color:var(--muted)}
+  .links a:hover{color:var(--text)}
+  .support{font-size:13.5px;font-weight:600;color:#03130a !important;background:var(--green);
+    padding:9px 17px;border-radius:999px;box-shadow:0 0 20px var(--green-glow)}
+  @media(max-width:840px){.links a:not(.support){display:none}}
+</style>
