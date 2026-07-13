@@ -1,0 +1,35 @@
+---
+import SectionLabel from '../SectionLabel.astro';
+import { OFFERINGS } from '../../consts';
+---
+<section class="offer"><div class="wrap">
+  <div class="head">
+    <SectionLabel>What we offer</SectionLabel>
+    <h2>Five ways we help you build.</h2>
+  </div>
+  <div class="grid">
+    {OFFERINGS.map((o) => (
+      <div class="row">
+        <div class="num">{o.num}</div>
+        <div>
+          <h3>{o.title}</h3>
+          <div class="desc">{o.desc}</div>
+        </div>
+        {o.soon && <div class="soon">Coming</div>}
+      </div>
+    ))}
+  </div>
+</div></section>
+<style>
+  .offer{padding:clamp(72px,10vw,120px) 0;border-top:1px solid var(--line)}
+  .grid{margin-top:52px}
+  .row{display:grid;grid-template-columns:64px 1fr auto;gap:26px;align-items:baseline;
+    padding:26px 0;border-top:1px solid var(--line)}
+  .row:last-child{border-bottom:1px solid var(--line)}
+  .num{font-family:var(--serif);font-size:26px;color:var(--green);font-weight:500}
+  h3{font-size:clamp(20px,2.6vw,26px)}
+  .desc{color:var(--muted);margin-top:6px;font-size:15.5px;max-width:52ch}
+  .soon{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);
+    border:1px solid rgba(61,255,149,.4);border-radius:999px;padding:4px 10px;white-space:nowrap;align-self:center}
+  @media(max-width:720px){.row{grid-template-columns:44px 1fr}.soon{grid-column:2;justify-self:start;margin-top:8px}}
+</style>

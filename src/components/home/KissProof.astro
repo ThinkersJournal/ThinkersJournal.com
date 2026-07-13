@@ -1,0 +1,19 @@
+---
+import SectionLabel from '../SectionLabel.astro';
+---
+<section class="proof"><div class="wrap inner">
+  <div class="txt">
+    <SectionLabel>Already in motion</SectionLabel>
+    <h2>We don't just talk about standards. We steward them.</h2>
+    <p><strong>KISS — the Kernel Interface Standards Suite</strong> — is the first set of standards we hold in trust: open, shared, and cared for so no single thinker has to carry them alone. It's proof the mission is already real.</p>
+  </div>
+  <a class="link" href="/standards">See the standards →</a>
+</div></section>
+<style>
+  .proof{background:var(--ink2);padding:clamp(72px,10vw,120px) 0;border-top:1px solid var(--line)}
+  .inner{display:flex;gap:40px;align-items:center;flex-wrap:wrap;justify-content:space-between}
+  .txt{max-width:60ch}
+  h2{font-size:clamp(26px,3.6vw,38px);margin-top:14px}
+  p{color:var(--muted);margin-top:16px;font-size:17px}
+  strong{color:#e9e9ee}
+</style>

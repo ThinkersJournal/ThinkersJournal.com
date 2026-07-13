@@ -1,0 +1,28 @@
+---
+import Button from '../Button.astro';
+import SectionLabel from '../SectionLabel.astro';
+---
+<div class="hero">
+  <div class="wrap inner">
+    <SectionLabel>A home for thinkers</SectionLabel>
+    <h1>No thinker should<br />have to build <em>alone.</em></h1>
+    <p class="sub">Everyone has an idea worth building — and no way to build it alone. Thinker's Journal gives makers of every kind a mentor who's been there, a partner who gets it, and the tools to bring what's in their heads into the world. Freely, or as close to free as we can make it.</p>
+    <div class="cta">
+      <Button href="/mission">Explore the mission</Button>
+      <Button href="/support" variant="ghost">Support the mission</Button>
+    </div>
+  </div>
+</div>
+<style>
+  .hero{position:relative;overflow:hidden;text-align:center;
+    background:linear-gradient(180deg,#141417 0%,#0a0a0c 42%,#060608 100%)}
+  .hero::before{content:"";position:absolute;top:0;left:0;right:0;height:180px;
+    background:linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,0));z-index:0}
+  .hero::after{content:"";position:absolute;inset:-25% -10% 0;z-index:0;filter:blur(70px);opacity:.8;
+    background:radial-gradient(42% 46% at 50% 26%,rgba(61,255,149,.20),transparent 70%),
+      radial-gradient(28% 30% at 50% 74%,rgba(61,255,149,.09),transparent 72%)}
+  .inner{position:relative;z-index:2;padding:clamp(64px,10vw,120px) 0 clamp(74px,9vw,104px)}
+  h1{font-size:clamp(38px,7vw,74px);line-height:1.04;margin-top:24px}
+  .sub{font-size:clamp(16px,2.1vw,19px);color:var(--muted);max-width:60ch;margin:26px auto 0}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:38px}
+</style>
