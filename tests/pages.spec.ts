@@ -38,3 +38,9 @@ test('support page shows all configured giving avenues', async ({ page }) => {
     await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
   }
 });
+
+test('unknown routes render the branded 404', async ({ page }) => {
+  const res = await page.goto('/no-such-page');
+  expect(res?.status()).toBe(404);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText("hasn't been built yet");
+});
