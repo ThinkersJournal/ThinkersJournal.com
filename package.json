@@ -2,6 +2,7 @@
   "name": "thinkersjournal-website",
   "type": "module",
   "version": "0.1.0",
+  "engines": { "node": ">=20" },
   "private": true,
   "scripts": {
     "dev": "astro dev",
