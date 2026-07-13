@@ -1,0 +1,28 @@
+---
+import PageLayout from '../../layouts/PageLayout.astro';
+import { getCollection, render } from 'astro:content';
+
+export async function getStaticPaths() {
+  const posts = await getCollection('dispatches', ({ data }) => !data.draft);
+  return posts.map((post) => ({ params: { slug: post.id }, props: { post } }));
+}
+
+const { post } = Astro.props;
+const { Content } = await render(post);
+const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month: 'long', day: 'numeric' });
+---
+<PageLayout
+  title={post.data.title}
+  eyebrow={fmt(post.data.date)}
+  heading={post.data.title}
+  intro={post.data.description}>
+  <article class="prose"><Content /></article>
+  <p class="back"><a class="link" href="/dispatches">← All dispatches</a></p>
+</PageLayout>
+<style>
+  .prose{max-width:68ch}
+  .prose :global(p){color:var(--muted);font-size:17px;margin-bottom:20px;line-height:1.7}
+  .prose :global(a){color:var(--green);text-decoration:underline}
+  .prose :global(h2){font-size:clamp(23px,3.2vw,30px);margin:36px 0 4px}
+  .back{margin-top:40px}
+</style>
