@@ -2,7 +2,8 @@ import { test, expect } from '@playwright/test';
 
 test('home responds and renders the brand name', async ({ page }) => {
   await page.goto('/');
-  await expect(page.getByTestId('placeholder')).toHaveText("Thinker's Journal");
+  await expect(page).toHaveTitle(/Thinker's Journal/);
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('No thinker should');
 });
 
 test('body uses the piano-black background token', async ({ page }) => {
