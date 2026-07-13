@@ -1,0 +1,22 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+---
+<PageLayout
+  title="Mission"
+  eyebrow="Our mission"
+  heading="No thinker should have to build alone."
+  intro="Thinker's Journal is a non-profit that helps thinkers of every kind bring what's in their heads into the world — free, at cost, or below market.">
+  <div class="prose">
+    <p>Every day, someone has an idea worth building — and no way to build it alone. We exist for them: the programmers, the makers, the quietly relentless people who can't stop turning a better version of something over in their minds.</p>
+    <p>We give them what they've been missing — a mentor who's been there, a partner who <em>gets it</em>, the tools to build, and a place to be taken seriously — offered freely, or as close to free as we can make it. Because a good idea should never die for lack of help.</p>
+    <p>We started with programmers, because that's where our roots run forty-four years deep. But the mission is bigger than any one craft: <strong>no thinker should have to build alone.</strong></p>
+    <h2>Why non-profit</h2>
+    <p>Charging market rates would put us out of reach of the very people we exist to help. So we don't. Thinker's Journal is a non-profit in formation, funded by people who believe in the mission, run as leanly and transparently as we can manage.</p>
+  </div>
+</PageLayout>
+<style>
+  .prose{max-width:66ch}
+  .prose p{color:var(--muted);font-size:17px;margin-bottom:20px}
+  .prose strong{color:#e9e9ee}
+  .prose h2{font-size:clamp(24px,3.4vw,32px);margin:40px 0 4px}
+</style>

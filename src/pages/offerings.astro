@@ -1,0 +1,31 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import { OFFERINGS } from '../consts';
+---
+<PageLayout
+  title="What We Offer"
+  eyebrow="What we offer"
+  heading="Five ways we help you build."
+  intro="Some of these are here today; others are on the way. All of them exist to close the gap between a thinker and a finished thing.">
+  <div class="list">
+    {OFFERINGS.map((o) => (
+      <div class="row">
+        <div class="num">{o.num}</div>
+        <div>
+          <h2>{o.title}{o.soon && <span class="soon">Coming</span>}</h2>
+          <p>{o.desc}</p>
+        </div>
+      </div>
+    ))}
+  </div>
+</PageLayout>
+<style>
+  .row{display:grid;grid-template-columns:64px 1fr;gap:26px;align-items:baseline;
+    padding:28px 0;border-top:1px solid var(--line)}
+  .row:last-child{border-bottom:1px solid var(--line)}
+  .num{font-family:var(--serif);font-size:26px;color:var(--green)}
+  h2{font-size:clamp(21px,2.8vw,28px)}
+  .soon{font-size:11px;letter-spacing:.14em;text-transform:uppercase;color:var(--green);
+    border:1px solid rgba(61,255,149,.4);border-radius:999px;padding:3px 9px;margin-left:12px;vertical-align:middle}
+  p{color:var(--muted);margin-top:8px;font-size:16px;max-width:58ch}
+</style>
