@@ -15,7 +15,7 @@
 - **Site URL:** `https://thinkersjournal.com` (set as `site` in `astro.config.mjs`; needed for sitemap/canonical).
 - **Color tokens (exact):** `--ink:#060608` `--ink2:#0a0a0d` `--green:#3dff95` `--green-bright:#7dffbc` `--green-glow:rgba(61,255,149,.5)` `--text:#f3f3f5` `--muted:#a8a8b3` `--dim:#7a7a85` `--line:rgba(255,255,255,.08)`.
 - **Mono-accent rule:** fluorescent green is the ONLY accent color. Never use pink/purple/orange as backgrounds or washes.
-- **Type:** `--serif:'Fraunces Variable',Georgia,serif` (wordmark + headlines); `--sans:'Inter Variable',system-ui,sans-serif` (UI + body).
+- **Type:** `--serif:'Fraunces Variable',Georgia,'Times New Roman',serif` (wordmark + headlines); `--sans:'Inter Variable',-apple-system,'Segoe UI',system-ui,sans-serif` (UI + body). (Fuller fallback stacks matching the approved mockup + Task 2 code; earlier abbreviated form was shorthand.)
 - **Readability:** body copy is `--text`/`--muted` on `--ink`; green is reserved for headings-accents, links, and CTAs — never body text.
 - **Wordmark:** the literal string `Thinker's Journal` in `--serif` followed by a green period (`.`).
 - **Tagline:** `No thinker should have to build alone.`
