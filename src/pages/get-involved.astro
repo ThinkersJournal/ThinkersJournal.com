@@ -1,0 +1,32 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+const ROLES = [
+  { id: 'mentor', title: 'Become a mentor', body: "Give a few hours to think through a hard problem with someone who's stuck. Experience is the gift here." },
+  { id: 'build', title: 'Help build', body: 'Designers, engineers, writers — the website, the tooling, and the Community platform all need hands.' },
+  { id: 'standards', title: 'Contribute to KISS', body: 'Shape the standards we steward. Read, critique, and propose in the open on GitHub.' },
+  { id: 'spread', title: 'Spread the word', body: "Tell one thinker who needs to hear that they don't have to build alone. That's how this grows." },
+];
+---
+<PageLayout
+  title="Get Involved"
+  eyebrow="Get involved"
+  heading="There's room for you here."
+  intro="Thinker's Journal is one person and a mission. It becomes a movement when others step in. Here's where you'd fit.">
+  <div class="roles">
+    {ROLES.map((r) => (
+      <div class="role" id={r.id}>
+        <h2>{r.title}</h2>
+        <p>{r.body}</p>
+      </div>
+    ))}
+  </div>
+  <p class="contact">Ready, or just curious? Email <a class="link" href="mailto:hello@thinkersjournal.com">hello@thinkersjournal.com</a> or open an issue on <a class="link" href="https://github.com/thinkersjournal">GitHub</a>.</p>
+</PageLayout>
+<style>
+  .roles{display:grid;grid-template-columns:1fr 1fr;gap:20px}
+  @media(max-width:680px){.roles{grid-template-columns:1fr}}
+  .role{border:1px solid var(--line);border-radius:14px;padding:24px;background:var(--ink2)}
+  .role h2{font-size:clamp(19px,2.4vw,23px)}
+  .role p{color:var(--muted);margin-top:10px;font-size:15.5px}
+  .contact{color:var(--muted);margin-top:34px;font-size:16px}
+</style>

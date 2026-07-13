@@ -25,3 +25,16 @@ test('community page explains the flagship and links to get-involved', async ({ 
   await expect(page.getByRole('heading', { level: 1 })).toContainText('Where your work comes alive.');
   await expect(page.getByRole('link', { name: 'Help build it' })).toHaveAttribute('href', '/get-involved');
 });
+
+test('get-involved offers a mentor role anchor', async ({ page }) => {
+  await page.goto('/get-involved');
+  await expect(page.locator('#mentor')).toBeVisible();
+  await expect(page.getByRole('heading', { name: 'Become a mentor' })).toBeVisible();
+});
+
+test('support page shows all configured giving avenues', async ({ page }) => {
+  await page.goto('/support');
+  for (const name of ['Open Collective', 'GitHub Sponsors', 'Ko-fi']) {
+    await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
+  }
+});
