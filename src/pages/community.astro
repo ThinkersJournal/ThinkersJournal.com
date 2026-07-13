@@ -1,0 +1,21 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+import Button from '../components/Button.astro';
+---
+<PageLayout
+  title="The Community"
+  eyebrow="The Community · Coming"
+  heading="Where your work comes alive."
+  intro="The flagship we're building toward: a place for thinkers to document what they're making — with living, precise links others can actually act on.">
+  <div class="prose">
+    <p>Imagine posting about a problem the way you'd post anywhere — but able to point at the <em>exact</em> thing: this file, these lines, that specific error. A reader hovers to preview it, or clicks to open it in the right place and start helping.</p>
+    <p>References reach beyond us, too — your code and running services here, your work on GitHub, GitLab, YouTube, and the open web — so your whole body of work can be seen, understood, and built on. The one rule: nothing linked is inherently harmful.</p>
+    <p>It's a big build, and it's coming in stages. If it excites you, the best thing you can do is come help make it real.</p>
+    <div class="cta"><Button href="/get-involved">Help build it</Button></div>
+  </div>
+</PageLayout>
+<style>
+  .prose{max-width:66ch}
+  .prose p{color:var(--muted);font-size:17px;margin-bottom:20px}
+  .cta{margin-top:32px}
+</style>

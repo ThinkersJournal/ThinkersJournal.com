@@ -1,0 +1,21 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+---
+<PageLayout
+  title="Standards"
+  eyebrow="Standards, held in trust"
+  heading="Standards no one should have to carry alone."
+  intro="Good standards outlive any one project. We steward them in the open so individual thinkers don't have to shoulder that weight themselves.">
+  <div class="prose">
+    <h2>KISS — the Kernel Interface Standards Suite</h2>
+    <p>KISS is the first suite of standards Thinker's Journal holds in trust. It lives in the open on GitHub, where anyone can read, use, and contribute to it.</p>
+    <p><a class="link" href="https://github.com/thinkersjournal">Browse KISS on GitHub →</a></p>
+    <h2>More to come</h2>
+    <p>KISS is a beginning, not the whole story. As thinkers bring standards worth protecting, this is where they'll find a steward.</p>
+  </div>
+</PageLayout>
+<style>
+  .prose{max-width:66ch}
+  .prose h2{font-size:clamp(23px,3.2vw,30px);margin:8px 0 4px}
+  .prose h2 + p, .prose p{color:var(--muted);font-size:17px;margin:14px 0 30px}
+</style>

@@ -13,3 +13,15 @@ test('offerings page lists all five offerings', async ({ page }) => {
     await expect(page.getByRole('heading', { name: new RegExp(t) })).toBeVisible();
   }
 });
+
+test('standards page links to the GitHub org', async ({ page }) => {
+  await page.goto('/standards');
+  await expect(page.getByRole('link', { name: 'Browse KISS on GitHub →' }))
+    .toHaveAttribute('href', 'https://github.com/thinkersjournal');
+});
+
+test('community page explains the flagship and links to get-involved', async ({ page }) => {
+  await page.goto('/community');
+  await expect(page.getByRole('heading', { level: 1 })).toContainText('Where your work comes alive.');
+  await expect(page.getByRole('link', { name: 'Help build it' })).toHaveAttribute('href', '/get-involved');
+});
