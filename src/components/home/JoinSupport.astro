@@ -1,0 +1,18 @@
+---
+import Button from '../Button.astro';
+---
+<section class="join"><div class="wrap">
+  <h2>Be part of the reason<br />no thinker builds alone.</h2>
+  <p>Thinker's Journal is built by people who believe in it. Join the mission, or help keep it alive — every bit of either moves us forward.</p>
+  <div class="cta">
+    <Button href="/get-involved">Join the mission</Button>
+    <Button href="/support" variant="ghost">Support the mission</Button>
+  </div>
+</div></section>
+<style>
+  .join{padding:clamp(72px,10vw,120px) 0;border-top:1px solid var(--line);text-align:center;
+    background:radial-gradient(60% 120% at 50% 0%,rgba(61,255,149,.08),transparent 60%),var(--ink)}
+  h2{font-size:clamp(30px,5vw,52px);line-height:1.08}
+  p{color:var(--muted);max-width:52ch;margin:20px auto 0;font-size:18px}
+  .cta{display:flex;gap:14px;justify-content:center;flex-wrap:wrap;margin-top:36px}
+</style>

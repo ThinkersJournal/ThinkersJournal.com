@@ -5,7 +5,7 @@ test('hero shows the tagline and both CTAs', async ({ page }) => {
   await expect(page.getByRole('heading', { level: 1 }))
     .toContainText('No thinker should');
   await expect(page.getByRole('link', { name: 'Explore the mission' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Support the mission' })).toBeVisible();
+  await expect(page.getByRole('link', { name: 'Support the mission' }).first()).toBeVisible();
 });
 
 test('the gap section lands the emotional line', async ({ page }) => {
@@ -25,4 +25,16 @@ test('KISS proof links to the standards page', async ({ page }) => {
   await page.goto('/');
   await expect(page.getByRole('link', { name: 'See the standards →' }))
     .toHaveAttribute('href', '/standards');
+});
+
+test('community teaser links to /community', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: "See what we're building →" }))
+    .toHaveAttribute('href', '/community');
+});
+
+test('join/support band offers both paths', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.getByRole('link', { name: 'Join the mission' })).toHaveAttribute('href', '/get-involved');
+  await expect(page.getByRole('link', { name: 'Support the mission' }).last()).toHaveAttribute('href', '/support');
 });
