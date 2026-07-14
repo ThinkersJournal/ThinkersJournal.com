@@ -1,4 +1,5 @@
 import { test, expect } from '@playwright/test';
+import { SUPPORT } from '../src/consts';
 
 test('mission page renders with the mission heading', async ({ page }) => {
   await page.goto('/mission');
@@ -32,10 +33,25 @@ test('get-involved offers a mentor role anchor', async ({ page }) => {
   await expect(page.getByRole('heading', { name: 'Become a mentor' })).toBeVisible();
 });
 
-test('support page shows all configured giving avenues', async ({ page }) => {
+test('support page shows live avenues as cards and names pending ones as coming soon', async ({ page }) => {
   await page.goto('/support');
-  for (const name of ['Open Collective', 'GitHub Sponsors', 'Ko-fi']) {
-    await expect(page.getByText(name, { exact: true }).first()).toBeVisible();
+  const live = SUPPORT.filter((s) => s.live);
+  const pending = SUPPORT.filter((s) => !s.live);
+
+  // Live avenues render as give-cards that link out to the platform.
+  for (const s of live) {
+    const card = page.locator(`a.card[href="${s.href}"]`);
+    await expect(card).toBeVisible();
+    await expect(card).toContainText(s.label);
+  }
+
+  // Pending avenues are not cards, but are named in the "more avenues on the way" note.
+  if (pending.length) {
+    const soon = page.locator('.soon');
+    await expect(soon).toBeVisible();
+    for (const s of pending) {
+      await expect(soon).toContainText(s.label);
+    }
   }
 });
 

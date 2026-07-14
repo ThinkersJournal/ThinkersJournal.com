@@ -1,6 +1,8 @@
 ---
 import PageLayout from '../layouts/PageLayout.astro';
 import { SUPPORT } from '../consts';
+const liveAvenues = SUPPORT.filter((s) => s.live);
+const comingSoon = SUPPORT.filter((s) => !s.live).map((s) => s.label);
 ---
 <PageLayout
   title="Support"
@@ -8,7 +10,7 @@ import { SUPPORT } from '../consts';
   heading="Keep the door open for the next thinker."
   intro="Thinker's Journal has no funding yet. Every contribution — of any size, through whichever avenue suits you — goes straight toward keeping our help free or below market. We deliberately favor low-fee platforms so more of your gift arrives.">
   <div class="grid">
-    {SUPPORT.map((s) => (
+    {liveAvenues.map((s) => (
       <a class="card" href={s.href} target="_blank" rel="noopener">
         <div class="name">{s.label}</div>
         <div class="note">{s.note}</div>
@@ -16,6 +18,9 @@ import { SUPPORT } from '../consts';
       </a>
     ))}
   </div>
+  {comingSoon.length > 0 && (
+    <p class="soon">More avenues on the way: {comingSoon.join(', ')}.</p>
+  )}
   <p class="foot">Prefer another way to give, or want to sponsor something specific? Reach out at <a class="link" href="mailto:hello@thinkersjournal.com">hello@thinkersjournal.com</a> — we'll add more avenues here over time.</p>
 </PageLayout>
 <style>
@@ -23,8 +28,9 @@ import { SUPPORT } from '../consts';
   .card{border:1px solid var(--line);border-radius:14px;padding:24px;background:var(--ink2);
     transition:transform .15s ease,border-color .2s ease}
   .card:hover{transform:translateY(-3px);border-color:rgba(61,255,149,.45)}
-  .name{font-family:var(--serif);font-size:21px;color:#fafafc}
+  .name{font-family:var(--serif);font-size:21px;color:var(--head)}
   .note{color:var(--muted);font-size:14px;margin-top:8px}
   .go{color:var(--green);font-weight:600;font-size:14px;margin-top:18px}
+  .soon{color:var(--dim);font-size:14px;margin-top:16px}
   .foot{color:var(--muted);margin-top:32px;font-size:16px;max-width:60ch}
 </style>

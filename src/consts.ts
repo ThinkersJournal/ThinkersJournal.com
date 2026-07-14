@@ -20,9 +20,10 @@ export const OFFERINGS: { num: string; title: string; desc: string; soon?: boole
   { num: '05', title: 'The Community', desc: "Where your work comes alive — document what you're building with living, precise links others can act on.", soon: true },
 ];
 
-// NOTE: replace href handles with the real accounts once created.
-export const SUPPORT: { label: string; href: string; note: string }[] = [
-  { label: 'Open Collective', href: 'https://opencollective.com/thinkersjournal', note: 'Transparent ledger · low fee' },
+// `live: true` = the account exists and the link resolves. Pending avenues are
+// hidden from the site (no dead links); flip `live: true` once each is set up.
+export const SUPPORT: { label: string; href: string; note: string; live?: boolean }[] = [
+  { label: 'Open Collective', href: 'https://opencollective.com/thinkersjournal', note: 'Transparent ledger · low fee', live: true },
   { label: 'GitHub Sponsors', href: 'https://github.com/sponsors/thinkersjournal', note: 'For the devs among us' },
   { label: 'Ko-fi', href: 'https://ko-fi.com/thinkersjournal', note: 'One-time, no account needed' },
 ];

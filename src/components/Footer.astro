@@ -24,13 +24,13 @@ import Wordmark from './Wordmark.astro';
     </div>
     <div class="col">
       <h4>Support</h4>
-      {SUPPORT.map((s) => <a href={s.href}>{s.label}</a>)}
+      {SUPPORT.filter((s) => s.live).map((s) => <a href={s.href}>{s.label}</a>)}
       <a href="/support">More ways to give →</a>
     </div>
   </div>
   <div class="wrap note">
     <span>Thinker's Journal is a non-profit in formation. <span class="green">Free, at cost, or below market — always.</span></span>
-    <span><a href="https://github.com/thinkersjournal">github.com/thinkersjournal</a></span>
+    <span><a href="/privacy">Privacy</a> · <a href="https://github.com/thinkersjournal">github.com/thinkersjournal</a></span>
   </div>
 </footer>
 <style>

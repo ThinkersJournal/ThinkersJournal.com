@@ -1,0 +1,29 @@
+---
+import PageLayout from '../layouts/PageLayout.astro';
+---
+<PageLayout
+  title="Privacy"
+  eyebrow="Privacy"
+  heading="We collect as little as humanly possible."
+  intro="Thinker's Journal is a non-profit in formation, and this site is built to respect you: no advertising, no tracking, no selling of anyone's data — ever.">
+  <div class="prose">
+    <h2>What this site collects</h2>
+    <p>Essentially nothing. This is a static site with no analytics, no cookies, and no tracking pixels. The fonts are served from our own domain, so no third-party font provider sees your visit. Our host (Cloudflare) keeps standard request logs for security and reliability — that's inherent to serving any website, and we don't use them to profile you.</p>
+    <h2>When you reach out</h2>
+    <p>If you email us, we receive whatever you send — your address and your message — and we use it only to reply and to help you. We don't add you to any list.</p>
+    <h2>When you donate</h2>
+    <p>Donations happen on third-party platforms such as <a class="link" href="https://opencollective.com/thinkersjournal">Open Collective</a>, each with its own privacy policy. We never see your card details; we only see what that platform chooses to show a recipient, such as a name and the amount given. Please review a platform's own policy before giving.</p>
+    <h2>Third parties we rely on</h2>
+    <p>Cloudflare hosts and delivers this site. Our donation avenues are run by the platforms linked on the <a class="link" href="/support">Support</a> page. That's the whole list.</p>
+    <h2>Your choices</h2>
+    <p>Because we don't collect personal data here, there's nothing to export or delete. If you've emailed us and want that correspondence removed, just ask at <a class="link" href="mailto:hello@thinkersjournal.com">hello@thinkersjournal.com</a> and we'll take care of it.</p>
+    <h2>Changes</h2>
+    <p>If this policy changes, we'll update it here. Last updated July 2026.</p>
+  </div>
+</PageLayout>
+<style>
+  .prose{max-width:66ch}
+  .prose h2{font-size:clamp(22px,3vw,28px);margin:36px 0 4px}
+  .prose h2:first-of-type{margin-top:8px}
+  .prose p{color:var(--muted);font-size:17px;margin:14px 0 0}
+</style>
