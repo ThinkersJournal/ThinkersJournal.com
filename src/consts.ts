@@ -25,5 +25,5 @@ export const OFFERINGS: { num: string; title: string; desc: string; soon?: boole
 export const SUPPORT: { label: string; href: string; note: string; live?: boolean }[] = [
   { label: 'Open Collective', href: 'https://opencollective.com/thinkersjournal', note: 'Transparent ledger · low fee', live: true },
   { label: 'GitHub Sponsors', href: 'https://github.com/sponsors/thinkersjournal', note: 'For the devs among us' },
-  { label: 'Ko-fi', href: 'https://ko-fi.com/thinkersjournal', note: 'One-time, no account needed' },
+  { label: 'Ko-fi', href: 'https://ko-fi.com/thinkersjournal', note: 'One-time, no account needed', live: true },
 ];
