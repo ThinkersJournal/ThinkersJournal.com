@@ -1,5 +1,5 @@
 import { test, expect } from '@playwright/test';
-import { SUPPORT } from '../src/consts';
+import { SUPPORT, APP } from '../src/consts';
 
 test('mission page renders with the mission heading', async ({ page }) => {
   await page.goto('/mission');
@@ -52,6 +52,26 @@ test('support page shows live avenues as cards and names pending ones as coming 
     for (const s of pending) {
       await expect(soon).toContainText(s.label);
     }
+  }
+});
+
+test('community app cross-links appear only when the app is live', async ({ page }) => {
+  // Gated by APP.live in src/consts.ts: off pre-launch (no dead links), on once the
+  // Community app is deployed. This test tracks the flag so it stays green either way.
+  await page.goto('/');
+  const signIn = page.locator(`header.nav a[href="${APP.login}"]`);
+  if (APP.live) {
+    await expect(signIn).toBeVisible();
+  } else {
+    await expect(signIn).toHaveCount(0);
+  }
+
+  await page.goto('/community');
+  const openApp = page.locator(`a.btn[href="${APP.url}"]`);
+  if (APP.live) {
+    await expect(openApp).toBeVisible();
+  } else {
+    await expect(openApp).toHaveCount(0);
   }
 });
 

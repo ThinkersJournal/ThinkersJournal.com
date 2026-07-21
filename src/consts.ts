@@ -5,6 +5,17 @@ export const SITE = {
   url: 'https://thinkersjournal.com',
 };
 
+// The Community platform (project ②) lives at community.thinkersjournal.com.
+// It's pre-launch, so `live: false` keeps its links OFF this site (no dead links) —
+// the same discipline as SUPPORT below. Flip to `true` once the app is deployed and
+// resolving; that single change lights up the nav "Sign in" link and the /community CTA.
+export const APP = {
+  live: false,
+  url: 'https://community.thinkersjournal.com',
+  login: 'https://community.thinkersjournal.com/login',
+  signup: 'https://community.thinkersjournal.com/signup',
+};
+
 export const NAV: { label: string; href: string }[] = [
   { label: 'Mission', href: '/mission' },
   { label: 'What We Offer', href: '/offerings' },

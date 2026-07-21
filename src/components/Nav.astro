@@ -1,5 +1,5 @@
 ---
-import { NAV } from '../consts';
+import { NAV, APP } from '../consts';
 import Wordmark from './Wordmark.astro';
 ---
 <header class="nav">
@@ -13,6 +13,7 @@ import Wordmark from './Wordmark.astro';
 
     <nav class="links" aria-label="Primary">
       {NAV.map((item) => <a href={item.href}>{item.label}</a>)}
+      {APP.live && <a href={APP.login}>Sign in</a>}
       <a href="/support" class="support">Support</a>
     </nav>
   </div>
