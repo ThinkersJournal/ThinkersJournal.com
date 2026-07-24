@@ -9,7 +9,7 @@ import Wordmark from './Wordmark.astro';
       <p>Helping thinkers of every kind design, build, and ship the things they're thinking about.</p>
     </div>
     <div class="col">
-      <h4>Explore</h4>
+      <p class="col-title">Explore</p>
       <a href="/mission">Mission</a>
       <a href="/offerings">What We Offer</a>
       <a href="/standards">Standards</a>
@@ -17,13 +17,13 @@ import Wordmark from './Wordmark.astro';
       <a href="/dispatches">Dispatches</a>
     </div>
     <div class="col">
-      <h4>Get involved</h4>
+      <p class="col-title">Get involved</p>
       <a href="/get-involved">Volunteer</a>
       <a href="/get-involved#mentor">Become a mentor</a>
       <a href="/standards">Contribute to KISS</a>
     </div>
     <div class="col">
-      <h4>Support</h4>
+      <p class="col-title">Support</p>
       {SUPPORT.filter((s) => s.live).map((s) => <a href={s.href}>{s.label}</a>)}
       <a href="/support">More ways to give →</a>
     </div>
@@ -38,7 +38,11 @@ import Wordmark from './Wordmark.astro';
   .grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:34px}
   @media(max-width:760px){.grid{grid-template-columns:1fr 1fr}}
   .brand p{color:var(--dim);font-size:14px;margin-top:12px;max-width:34ch}
-  .col h4{font-size:12px;letter-spacing:.16em;text-transform:uppercase;color:var(--dim);margin-bottom:14px}
+  /* Column labels are <p>, not <h4>: a shared footer can't know the page's heading
+     depth, so a fixed h4 skipped levels site-wide (WCAG 1.3.1). font-weight is set
+     explicitly here because it used to come from the browser's default h4 style. */
+  .col .col-title{font-weight:700;font-size:12px;letter-spacing:.16em;
+    text-transform:uppercase;color:var(--dim);margin-bottom:14px}
   .col a{display:block;color:var(--muted);font-size:14.5px;padding:5px 0}
   .col a:hover{color:var(--text)}
   .note{margin-top:44px;padding-top:22px;border-top:1px solid var(--line);
