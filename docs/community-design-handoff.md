@@ -1,8 +1,8 @@
 # Design-System Handoff → Community Platform (project ②)
 
-**From:** the ThinkersJournal.com marketing website (project ①), repo `C:\Projects\ThinkersJournal.com`
-**To:** the Community platform `web` app, repo `C:\Projects\ThinkersJournal-Community`
-**Why this file exists:** the `claude-peers` channel is delivering one-way only (Community → website works; website → Community is dropping). Both repos are on the same machine, so this file + the source paths it points at are the reliable handoff. Read it directly.
+**From:** the ThinkersJournal.com marketing website (project ①), repo `ThinkersJournal.com`
+**To:** the Community platform `web` app, repo `ThinkersJournal-Community`
+**Why this file exists:** a self-contained snapshot of the marketing site's design system, so the Community app can adopt it without reading across repos. **All source paths below are relative to the root of the `ThinkersJournal.com` repo** unless stated otherwise.
 
 ---
 
@@ -19,7 +19,7 @@
 
 ## 1. Design tokens — copy verbatim
 
-Source of truth: `C:\Projects\ThinkersJournal.com\src\styles\tokens.css` (one `:root` block):
+Source of truth: `src/styles/tokens.css` (one `:root` block):
 
 ```css
 :root{
@@ -43,7 +43,7 @@ Source of truth: `C:\Projects\ThinkersJournal.com\src\styles\tokens.css` (one `:
 
 ## 2. Global base — copy verbatim
 
-Source of truth: `C:\Projects\ThinkersJournal.com\src\styles\global.css`:
+Source of truth: `src/styles/global.css`:
 
 ```css
 @import './tokens.css';
@@ -102,13 +102,13 @@ import '@fontsource-variable/inter';
 
 Read these directly:
 
-| File (under `C:\Projects\ThinkersJournal.com\src\`) | What it is |
+| File (under `src/` in the `ThinkersJournal.com` repo) | What it is |
 |---|---|
-| `layouts\BaseLayout.astro` | App shell: `<html><head BaseHead/><body>` Nav + `<main><slot/></main>` + Footer |
-| `layouts\PageLayout.astro` | Wraps BaseLayout, adds a "band" header (eyebrow + h1 + intro) with a soft green radial glow. Good for marketing-ish pages; your authed `/feed` probably wants just the BaseLayout shell |
-| `components\Nav.astro` | Sticky bar, backdrop-blur `rgba(6,6,8,.72)`, 1px `--line` bottom border, 66px tall; wordmark left, links right, glowing-green "Support" pill; zero-JS mobile disclosure (checkbox + label, burger→X) |
-| `components\Footer.astro` | 4-col grid (brand + Explore/Get-involved/Support) → 2-col under 760px, on `#040405` |
-| `components\BaseHead.astro` | `<head>`: Fontsource imports, `<title>`, description, canonical, favicon, OG/Twitter meta, `theme-color #060608` |
+| `layouts/BaseLayout.astro` | App shell: `<html><head BaseHead/><body>` Nav + `<main><slot/></main>` + Footer |
+| `layouts/PageLayout.astro` | Wraps BaseLayout, adds a "band" header (eyebrow + h1 + intro) with a soft green radial glow. Good for marketing-ish pages; your authed `/feed` probably wants just the BaseLayout shell |
+| `components/Nav.astro` | Sticky bar, backdrop-blur `rgba(6,6,8,.72)`, 1px `--line` bottom border, 66px tall; wordmark left, links right, glowing-green "Support" pill; zero-JS mobile disclosure (checkbox + label, burger→X) |
+| `components/Footer.astro` | 4-col grid (brand + Explore/Get-involved/Support) → 2-col under 760px, on `#040405` |
+| `components/BaseHead.astro` | `<head>`: Fontsource imports, `<title>`, description, canonical, favicon, OG/Twitter meta, `theme-color #060608` |
 
 **IMPORTANT:** do **not** copy the marketing Nav's *link set* (Mission / Offerings / Standards / Dispatches / Support) into the app. The app needs its own nav (Feed, Authors, profile, notifications, sign-out). Preserve the **chrome** — sticky blurred bar, wordmark left, `--line` border, green-pill primary action, same Footer treatment — and swap in your app's links.
 
@@ -148,7 +148,7 @@ const { href, variant = 'primary' } = Astro.props;
 
 ## 6. Favicon — reuse as-is
 
-Copy `C:\Projects\ThinkersJournal.com\public\favicon.svg` to your web root and link
+Copy `public/favicon.svg` to your web root and link
 `<link rel="icon" href="/favicon.svg" type="image/svg+xml">`:
 
 ```svg
@@ -177,4 +177,4 @@ When the app has a stable entry URL (e.g. `/feed` for signed-in users, `/choose-
 
 ---
 
-*Questions the source doesn't answer → route through Eric (he can talk to both sessions). The `claude-peers` website→Community direction is currently unreliable, so don't wait on channel replies from the website peer.*
+*Questions the source doesn't answer → reach the website side directly on the `claude-peers` channel (or route through Eric, who can talk to both sessions).*

@@ -9,11 +9,13 @@ export const SITE = {
 // It's pre-launch, so `live: false` keeps its links OFF this site (no dead links) —
 // the same discipline as SUPPORT below. Flip to `true` once the app is deployed and
 // resolving; that single change lights up the nav "Sign in" link and the /community CTA.
+// The entry URLs derive from one origin constant so a host change can't leave them out of sync.
+const APP_ORIGIN = 'https://community.thinkersjournal.com';
 export const APP = {
   live: false,
-  url: 'https://community.thinkersjournal.com',
-  login: 'https://community.thinkersjournal.com/login',
-  signup: 'https://community.thinkersjournal.com/signup',
+  url: APP_ORIGIN,
+  login: `${APP_ORIGIN}/login`,
+  signup: `${APP_ORIGIN}/signup`,
 };
 
 export const NAV: { label: string; href: string }[] = [
