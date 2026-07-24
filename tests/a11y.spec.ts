@@ -26,3 +26,20 @@ for (const route of [...ROUTES, '/no-such-page']) {
     expect(offenders, JSON.stringify(offenders, null, 2)).toEqual([]);
   });
 }
+
+// The sweeps above run at the default (desktop) viewport, where the mobile nav is
+// display:none — so the zero-JS checkbox disclosure and its OPEN state had never been
+// scanned. Below 840px the burger appears and the links become a dropdown panel.
+// Scan the menu open, at mobile width, on a real page.
+test('mobile nav has no serious a11y violations with the menu open', async ({ page }) => {
+  await page.setViewportSize({ width: 390, height: 844 });
+  await page.goto('/');
+
+  // Open the disclosure and confirm the panel is actually shown before scanning.
+  await page.locator('label.burger').click();
+  await expect(page.locator('nav.links')).toBeVisible();
+
+  const results = await new AxeBuilder({ page }).withTags(['wcag2a', 'wcag2aa']).analyze();
+  const serious = results.violations.filter((v) => ['serious', 'critical'].includes(v.impact ?? ''));
+  expect(serious, JSON.stringify(serious.map((v) => v.id), null, 2)).toEqual([]);
+});
