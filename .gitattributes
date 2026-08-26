@@ -1,0 +1,29 @@
+# Normalize all text files to LF in the repository; Git auto-detects text vs binary.
+# The index is already all-LF, so adding this is preventive — it produces no
+# renormalization diff and guards the current state against a contributor whose
+# core.autocrlf differs.
+* text=auto
+
+# Text files that are read or served byte-for-byte — force LF in the working tree
+# too (a shell script or license file with CRLF can break on Unix / trip tooling).
+*.sh        text eol=lf
+LICENSE*    text eol=lf
+
+# Binary assets — never normalize. A mis-normalized image or font is a corrupt
+# file that fails at serve time, not at commit time. Listed defensively so a
+# future asset is covered even though only og.png is committed today.
+*.png       binary
+*.jpg       binary
+*.jpeg      binary
+*.gif       binary
+*.ico       binary
+*.webp      binary
+*.avif      binary
+*.pdf       binary
+*.woff      binary
+*.woff2     binary
+*.ttf       binary
+*.otf       binary
+*.eot       binary
+*.mp4       binary
+*.zip       binary
