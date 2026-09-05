@@ -23,8 +23,6 @@ const REPO = resolve(dirname(fileURLToPath(import.meta.url)), '..');
 const PLANS = join(REPO, 'docs/superpowers/plans');
 const SPEC = 'docs/superpowers/specs/2026-07-13-thinkers-journal-website-design.md';
 
-const VERBS = 'Create|Rewrite|Write|Update|Finalize|Extend|Add|Render';
-
 /**
  * Repo-relative paths a plan's steps name, with the verb that named them.
  *
@@ -37,7 +35,11 @@ const VERBS = 'Create|Rewrite|Write|Update|Finalize|Extend|Add|Render';
  * `the extractors can fail rather than returning a false clean result` pin those forms.
  */
 export function namedArtifacts(plan: string): { verb: string; path: string }[] {
-  const re = new RegExp(String.raw`\*\*Step \d+: (${VERBS})\b[^\`*]*\`([^\`]+)\``, 'gi');
+  // A literal rather than `new RegExp(...)`: a dynamically built pattern is flagged as a
+  // security risk, and would be a real one the moment the interpolated part stopped being
+  // a constant. `matchAll` clones the regex, so the `g` flag carries no shared lastIndex.
+  const re =
+    /\*\*Step \d+: (Create|Rewrite|Write|Update|Finalize|Extend|Add|Render)\b[^`*]*`([^`]+)`/gi;
   const seen = new Map<string, string>();
   for (const m of plan.matchAll(re)) {
     // A step may name a component (`<Wordmark />`) rather than a file. Only path-shaped
