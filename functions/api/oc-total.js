@@ -32,8 +32,7 @@ export async function onRequestGet(context) {
     });
     if (res.ok) {
       const json = await res.json();
-      const amt = json && json.data && json.data.account
-        && json.data.account.stats && json.data.account.stats.totalAmountReceived;
+      const amt = json?.data?.account?.stats?.totalAmountReceived;
       if (amt && typeof amt.valueInCents === 'number') {
         payload = { ok: true, amountCents: amt.valueInCents, currency: amt.currency || 'USD' };
       }
@@ -49,7 +48,8 @@ export async function onRequestGet(context) {
       'cache-control': `public, max-age=${maxAge}, s-maxage=${maxAge}`,
     },
   });
-  // Only persist successful responses at the edge.
-  if (payload.ok) context.waitUntil(cache.put(cacheKey, response.clone()));
+  // Cache at the edge — success ~1h, failure 60s (each response carries its own
+  // Cache-Control) — so an OC outage backs off instead of re-hitting upstream per request.
+  context.waitUntil(cache.put(cacheKey, response.clone()));
   return response;
 }
