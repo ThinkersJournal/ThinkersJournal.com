@@ -133,7 +133,7 @@ One emotional arc — *problem → promise → proof → invitation.* The **appr
 
 ## 11. Open questions / to confirm later
 
-- Create the actual **Open Collective / GitHub Sponsors / Ko-fi** accounts and wire real links (placeholders until then).
+- **PARTLY RESOLVED 2026-09-05** — ~~Create the actual **Open Collective / GitHub Sponsors / Ko-fi** accounts and wire real links (placeholders until then).~~ **Open Collective and Ko-fi are live** and their links resolve (`SUPPORT` in `src/consts.ts`, `live: true`); **GitHub Sponsors is the only one still pending**, and is hidden from the site rather than rendered as a dead link. `tests/pages.spec.ts` covers both states.
 - Founder's full **About** content for `/mission` (user to provide).
 - ~~Whether to ship the **live donation total** island at launch or after.~~ **RESOLVED 2026-09-05** — shipped as a progressive, threshold-gated island (`functions/api/oc-total.js` + `/support`, PR #6). It degrades to no number, never to $0.
 - Custom **logo** (typographic wordmark until then).
