@@ -2,7 +2,9 @@ export const SITE = {
   title: "Thinker's Journal",
   description:
     "A non-profit helping thinkers of every kind design, build, and ship the things they're thinking about. No thinker should have to build alone.",
-  url: 'https://thinkersjournal.com',
+  // WWW is canonical (see astro.config.mjs for why); canonical/og derive from Astro.site,
+  // so this is the display/reference form only.
+  url: 'https://www.thinkersjournal.com',
 };
 
 // The Community platform (project ②) lives at community.thinkersjournal.com.
