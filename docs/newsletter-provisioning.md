@@ -42,9 +42,11 @@ Verify these against the Listmonk version you install; adjust the function if th
    - `LISTMONK_LIST_ID` (the numeric list id)
 
 8. **Trigger a redeploy.** Cloudflare Pages binds env vars **at deploy time** — an existing
-   deployment will NOT see newly-set vars. After step 7, create a new deployment (Pages →
-   Deployments → *Retry deployment* / *Create deployment*, or push any commit). Only then
-   does `GET /api/subscribe` report `configured: true` and the live form replace the fallback.
+   deployment will NOT see newly-set vars. After step 7, trigger a new deployment.
+   **Pushing any commit to the repo rebuilds Pages and needs no dashboard access** — use
+   that if you can't reach the Cloudflare dashboard; otherwise Pages → Deployments →
+   *Retry deployment* / *Create deployment*. Only then does `GET /api/subscribe` report
+   `configured: true` and the live form replace the fallback.
 
 9. **Purge the cache (or wait ~4h).** ⚠️ The site's HTML is edge-cached ~4 hours, so even
    after the redeploy the **cached `/dispatches` will keep showing the static `hello@`
