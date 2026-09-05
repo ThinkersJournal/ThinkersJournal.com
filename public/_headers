@@ -6,6 +6,11 @@
 # Content-Security-Policy, externalize or hash those inline scripts and confirm zero
 # violations in DevTools. Report-only cannot break the site; enforcing can, silently.
 #
+# No report-uri/report-to destination is set: violations surface in each visitor's console,
+# which is enough for the pre-enforcement verification this phase is for. Add a collector
+# (report-to + a Reporting-Endpoints header, or a service like Sentry) only if central
+# aggregation is wanted later — it is not required to promote this to an enforcing CSP.
+#
 # HSTS (Strict-Transport-Security) is intentionally NOT set here — it stays a Cloudflare
 # dashboard toggle (founder's call).
 /*
