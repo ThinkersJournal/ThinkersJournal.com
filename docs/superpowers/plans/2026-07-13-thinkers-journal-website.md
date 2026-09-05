@@ -1,6 +1,24 @@
 # Thinker's Journal Website — Implementation Plan
 
-> **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
+> # ⚠ EXECUTED — HISTORICAL RECORD, NOT A WORK QUEUE
+>
+> **This plan was carried out in full and the site it describes is live on Cloudflare Pages.**
+> **Do not implement it.** Its steps name **42** files; every one of the 42 exists in the
+> tree, and the work shipped through PRs #1–#10.
+>
+> ⚠ **DISCHARGED 2026-09-05.** Until today this document opened with *“REQUIRED SUB-SKILL: Use
+> superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to
+> implement this plan task-by-task”* — and all **83** of its step checkboxes were unticked,
+> with `- [x]` appearing **zero** times. **An agent handed this plan read a complete, unstarted
+> work queue, and would have begun by creating `package.json` against a live site.**
+>
+> **The boxes below are now ticked rather than left for the header to explain away.** A header
+> does not protect a reader who lands mid-document, and a plan whose every box reads `- [ ]`
+> is a work queue no matter what precedes it.
+>
+> The task-by-task detail is kept deliberately: it is the record of how the site was built and
+> what each decision was for. `tests/docs-artifacts.spec.ts` fails if a plan's named artifacts
+> all exist while unticked boxes remain.
 
 **Goal:** Build the static Thinker's Journal marketing/mission website — an emotional, mission-first site that makes visitors understand and believe, with gentle join/support asks — and deploy it on Cloudflare Pages.
 
@@ -96,7 +114,7 @@ tests/
 **Interfaces:**
 - Produces: npm scripts `dev` (`astro dev`), `build` (`astro build`), `preview`, `check` (`astro check`), `test` (`playwright test`). Dev server on `http://localhost:4321`.
 
-- [ ] **Step 1: Create `package.json`**
+- [x] **Step 1: Create `package.json`**
 
 ```json
 {
@@ -126,7 +144,7 @@ tests/
 }
 ```
 
-- [ ] **Step 2: Create `astro.config.mjs`**
+- [x] **Step 2: Create `astro.config.mjs`**
 
 ```js
 import { defineConfig } from 'astro/config';
@@ -138,7 +156,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 3: Create `tsconfig.json`**
+- [x] **Step 3: Create `tsconfig.json`**
 
 ```json
 {
@@ -148,7 +166,7 @@ export default defineConfig({
 }
 ```
 
-- [ ] **Step 4: Create `playwright.config.ts`**
+- [x] **Step 4: Create `playwright.config.ts`**
 
 ```ts
 import { defineConfig } from '@playwright/test';
@@ -167,7 +185,7 @@ export default defineConfig({
 });
 ```
 
-- [ ] **Step 5: Create temporary `src/pages/index.astro`**
+- [x] **Step 5: Create temporary `src/pages/index.astro`**
 
 ```astro
 ---
@@ -178,7 +196,7 @@ export default defineConfig({
 </html>
 ```
 
-- [ ] **Step 6: Write the failing smoke test `tests/smoke.spec.ts`**
+- [x] **Step 6: Write the failing smoke test `tests/smoke.spec.ts`**
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -189,22 +207,22 @@ test('home responds and renders the brand name', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 7: Install dependencies and the browser**
+- [x] **Step 7: Install dependencies and the browser**
 
 Run: `npm install && npx playwright install chromium`
 Expected: installs complete without error.
 
-- [ ] **Step 8: Run the smoke test (verify it passes)**
+- [x] **Step 8: Run the smoke test (verify it passes)**
 
 Run: `npm test`
 Expected: 1 passed. (If Astro's dev server boots and serves the placeholder, the test is green.)
 
-- [ ] **Step 9: Verify a production build succeeds**
+- [x] **Step 9: Verify a production build succeeds**
 
 Run: `npm run build`
 Expected: `astro build` completes, `dist/index.html` produced.
 
-- [ ] **Step 10: Commit**
+- [x] **Step 10: Commit**
 
 ```bash
 git add -A
@@ -223,7 +241,7 @@ git commit -m "chore: scaffold Astro project + Playwright harness"
 **Interfaces:**
 - Produces: global classes `.wrap`, `.label`, `.btn`/`.btn-primary`/`.btn-ghost`, `.link`, `.serif`; CSS vars from Global Constraints on `:root`. `--serif` uses `'Fraunces Variable'`, `--sans` uses `'Inter Variable'`.
 
-- [ ] **Step 1: Create `src/styles/tokens.css`**
+- [x] **Step 1: Create `src/styles/tokens.css`**
 
 ```css
 :root{
@@ -242,7 +260,7 @@ git commit -m "chore: scaffold Astro project + Playwright harness"
 }
 ```
 
-- [ ] **Step 2: Create `src/styles/global.css`** (ported from the approved mockup)
+- [x] **Step 2: Create `src/styles/global.css`** (ported from the approved mockup)
 
 ```css
 @import './tokens.css';
@@ -274,7 +292,7 @@ em{font-family:var(--serif);font-style:italic;color:var(--green-bright)}
 h1,h2,h3{font-family:var(--serif);font-weight:500;letter-spacing:-.01em;color:#fafafc}
 ```
 
-- [ ] **Step 3: Update `src/pages/index.astro` to import fonts + global CSS**
+- [x] **Step 3: Update `src/pages/index.astro` to import fonts + global CSS**
 
 ```astro
 ---
@@ -288,7 +306,7 @@ import '../styles/global.css';
 </html>
 ```
 
-- [ ] **Step 4: Add a failing token assertion to `tests/smoke.spec.ts`**
+- [x] **Step 4: Add a failing token assertion to `tests/smoke.spec.ts`**
 
 ```ts
 test('body uses the piano-black background token', async ({ page }) => {
@@ -299,12 +317,12 @@ test('body uses the piano-black background token', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 5: Run tests (verify the new one passes)**
+- [x] **Step 5: Run tests (verify the new one passes)**
 
 Run: `npm test`
 Expected: 2 passed. (The background resolves to the token value.)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -329,7 +347,7 @@ git commit -m "feat: add design tokens, global styles, self-hosted fonts"
   - `<Button href variant="primary"|"ghost">slot</Button>`
   - `<SectionLabel>slot</SectionLabel>` → `<p class="label">`.
 
-- [ ] **Step 1: Create `src/consts.ts`**
+- [x] **Step 1: Create `src/consts.ts`**
 
 ```ts
 export const SITE = {
@@ -362,7 +380,7 @@ export const SUPPORT: { label: string; href: string; note: string }[] = [
 ];
 ```
 
-- [ ] **Step 2: Create `src/components/Wordmark.astro`**
+- [x] **Step 2: Create `src/components/Wordmark.astro`**
 
 ```astro
 ---
@@ -376,7 +394,7 @@ const { size = '21px' } = Astro.props;
 </style>
 ```
 
-- [ ] **Step 3: Create `src/components/Button.astro`**
+- [x] **Step 3: Create `src/components/Button.astro`**
 
 ```astro
 ---
@@ -386,7 +404,7 @@ const { href, variant = 'primary' } = Astro.props;
 <a href={href} class={`btn btn-${variant}`}><slot /></a>
 ```
 
-- [ ] **Step 4: Create `src/components/SectionLabel.astro`**
+- [x] **Step 4: Create `src/components/SectionLabel.astro`**
 
 ```astro
 ---
@@ -394,7 +412,7 @@ const { href, variant = 'primary' } = Astro.props;
 <p class="label"><slot /></p>
 ```
 
-- [ ] **Step 5: Write the failing test `tests/chrome.spec.ts`** (Wordmark portion)
+- [x] **Step 5: Write the failing test `tests/chrome.spec.ts`** (Wordmark portion)
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -408,7 +426,7 @@ test('wordmark shows the brand name with a green dot', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 6: Render `<Wordmark />` on the placeholder home so the test has something to hit**
+- [x] **Step 6: Render `<Wordmark />` on the placeholder home so the test has something to hit**
 
 In `src/pages/index.astro`, import and use it inside `<body>`:
 
@@ -425,12 +443,12 @@ import Wordmark from '../components/Wordmark.astro';
 </html>
 ```
 
-- [ ] **Step 7: Run the test (verify it passes)**
+- [x] **Step 7: Run the test (verify it passes)**
 
 Run: `npx playwright test tests/chrome.spec.ts`
 Expected: 1 passed.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -450,7 +468,7 @@ git commit -m "feat: add site constants and Wordmark/Button/SectionLabel atoms"
 - Consumes: `SITE`, `NAV`, `SUPPORT` from `consts.ts`; `<Wordmark />`.
 - Produces: `<BaseLayout title?:string description?:string>slot</BaseLayout>` renders `<html lang="en">` with head, a `<header>` nav (role banner), `<main>`, and `<footer>` (role contentinfo).
 
-- [ ] **Step 1: Create `src/components/BaseHead.astro`**
+- [x] **Step 1: Create `src/components/BaseHead.astro`**
 
 ```astro
 ---
@@ -476,7 +494,7 @@ const canonical = new URL(Astro.url.pathname, Astro.site).href;
 <meta name="theme-color" content="#060608" />
 ```
 
-- [ ] **Step 2: Create `src/components/Nav.astro`**
+- [x] **Step 2: Create `src/components/Nav.astro`**
 
 ```astro
 ---
@@ -504,7 +522,7 @@ import Wordmark from './Wordmark.astro';
 </style>
 ```
 
-- [ ] **Step 3: Create `src/components/Footer.astro`**
+- [x] **Step 3: Create `src/components/Footer.astro`**
 
 ```astro
 ---
@@ -556,7 +574,7 @@ import Wordmark from './Wordmark.astro';
 </style>
 ```
 
-- [ ] **Step 4: Create `src/layouts/BaseLayout.astro`**
+- [x] **Step 4: Create `src/layouts/BaseLayout.astro`**
 
 ```astro
 ---
@@ -578,7 +596,7 @@ const { title, description } = Astro.props;
 </html>
 ```
 
-- [ ] **Step 5: Rewrite `src/pages/index.astro` to use the layout**
+- [x] **Step 5: Rewrite `src/pages/index.astro` to use the layout**
 
 ```astro
 ---
@@ -591,7 +609,7 @@ import BaseLayout from '../layouts/BaseLayout.astro';
 </BaseLayout>
 ```
 
-- [ ] **Step 6: Extend `tests/chrome.spec.ts` with failing nav + footer assertions**
+- [x] **Step 6: Extend `tests/chrome.spec.ts` with failing nav + footer assertions**
 
 ```ts
 test('primary nav exposes the four sections plus Support', async ({ page }) => {
@@ -616,12 +634,12 @@ test('page has exactly one banner, main, and contentinfo landmark', async ({ pag
 });
 ```
 
-- [ ] **Step 7: Run tests (verify they pass)**
+- [x] **Step 7: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/chrome.spec.ts`
 Expected: 4 passed.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -641,7 +659,7 @@ git commit -m "feat: add BaseHead, Nav, Footer, and BaseLayout site chrome"
 - Consumes: `OFFERINGS` from `consts.ts`; `Button`, `SectionLabel`.
 - Produces: four self-contained `<section>` components with no required props.
 
-- [ ] **Step 1: Create `src/components/home/Hero.astro`** (ported from the mockup)
+- [x] **Step 1: Create `src/components/home/Hero.astro`** (ported from the mockup)
 
 ```astro
 ---
@@ -674,7 +692,7 @@ import SectionLabel from '../SectionLabel.astro';
 </style>
 ```
 
-- [ ] **Step 2: Create `src/components/home/Gap.astro`**
+- [x] **Step 2: Create `src/components/home/Gap.astro`**
 
 ```astro
 ---
@@ -695,7 +713,7 @@ import SectionLabel from '../SectionLabel.astro';
 </style>
 ```
 
-- [ ] **Step 3: Create `src/components/home/Offerings.astro`**
+- [x] **Step 3: Create `src/components/home/Offerings.astro`**
 
 ```astro
 ---
@@ -735,7 +753,7 @@ import { OFFERINGS } from '../../consts';
 </style>
 ```
 
-- [ ] **Step 4: Create `src/components/home/KissProof.astro`**
+- [x] **Step 4: Create `src/components/home/KissProof.astro`**
 
 ```astro
 ---
@@ -759,7 +777,7 @@ import SectionLabel from '../SectionLabel.astro';
 </style>
 ```
 
-- [ ] **Step 5: Update `src/pages/index.astro` to render these four**
+- [x] **Step 5: Update `src/pages/index.astro` to render these four**
 
 ```astro
 ---
@@ -777,7 +795,7 @@ import KissProof from '../components/home/KissProof.astro';
 </BaseLayout>
 ```
 
-- [ ] **Step 6: Write failing `tests/home.spec.ts`**
+- [x] **Step 6: Write failing `tests/home.spec.ts`**
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -810,12 +828,12 @@ test('KISS proof links to the standards page', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 7: Run tests (verify they pass)**
+- [x] **Step 7: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/home.spec.ts`
 Expected: 4 passed.
 
-- [ ] **Step 8: Commit**
+- [x] **Step 8: Commit**
 
 ```bash
 git add -A
@@ -835,7 +853,7 @@ git commit -m "feat: add home hero, gap, offerings, and KISS proof sections"
 - Consumes: `SectionLabel`, `Button`.
 - Produces: three `<section>` components with no required props.
 
-- [ ] **Step 1: Create `src/components/home/CommunityTeaser.astro`** (includes the hover mock post, static)
+- [x] **Step 1: Create `src/components/home/CommunityTeaser.astro`** (includes the hover mock post, static)
 
 ```astro
 ---
@@ -880,7 +898,7 @@ import SectionLabel from '../SectionLabel.astro';
 </style>
 ```
 
-- [ ] **Step 2: Create `src/components/home/Founder.astro`**
+- [x] **Step 2: Create `src/components/home/Founder.astro`**
 
 ```astro
 ---
@@ -902,7 +920,7 @@ import SectionLabel from '../SectionLabel.astro';
 </style>
 ```
 
-- [ ] **Step 3: Create `src/components/home/JoinSupport.astro`**
+- [x] **Step 3: Create `src/components/home/JoinSupport.astro`**
 
 ```astro
 ---
@@ -925,7 +943,7 @@ import Button from '../Button.astro';
 </style>
 ```
 
-- [ ] **Step 4: Finalize `src/pages/index.astro`**
+- [x] **Step 4: Finalize `src/pages/index.astro`**
 
 ```astro
 ---
@@ -949,7 +967,7 @@ import JoinSupport from '../components/home/JoinSupport.astro';
 </BaseLayout>
 ```
 
-- [ ] **Step 5: Extend `tests/home.spec.ts`**
+- [x] **Step 5: Extend `tests/home.spec.ts`**
 
 ```ts
 test('community teaser links to /community', async ({ page }) => {
@@ -965,12 +983,12 @@ test('join/support band offers both paths', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 6: Run the full home suite**
+- [x] **Step 6: Run the full home suite**
 
 Run: `npx playwright test tests/home.spec.ts`
 Expected: 6 passed.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
@@ -989,7 +1007,7 @@ git commit -m "feat: complete home page (community teaser, founder, join/support
 - Consumes: `BaseLayout`, `SectionLabel`, `OFFERINGS`.
 - Produces: `<PageLayout title:string eyebrow:string heading:string intro?:string>slot</PageLayout>` — renders a compact hero band (`<h1>` = `heading`) then the slotted body inside `.wrap`.
 
-- [ ] **Step 1: Create `src/layouts/PageLayout.astro`**
+- [x] **Step 1: Create `src/layouts/PageLayout.astro`**
 
 ```astro
 ---
@@ -1019,7 +1037,7 @@ const { title, eyebrow, heading, intro } = Astro.props;
 </style>
 ```
 
-- [ ] **Step 2: Create `src/pages/mission.astro`**
+- [x] **Step 2: Create `src/pages/mission.astro`**
 
 ```astro
 ---
@@ -1046,7 +1064,7 @@ import PageLayout from '../layouts/PageLayout.astro';
 </style>
 ```
 
-- [ ] **Step 3: Create `src/pages/offerings.astro`**
+- [x] **Step 3: Create `src/pages/offerings.astro`**
 
 ```astro
 ---
@@ -1082,7 +1100,7 @@ import { OFFERINGS } from '../consts';
 </style>
 ```
 
-- [ ] **Step 4: Write failing `tests/pages.spec.ts`**
+- [x] **Step 4: Write failing `tests/pages.spec.ts`**
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -1102,12 +1120,12 @@ test('offerings page lists all five offerings', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 5: Run tests (verify they pass)**
+- [x] **Step 5: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/pages.spec.ts`
 Expected: 2 passed.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1125,7 +1143,7 @@ git commit -m "feat: add PageLayout, Mission page, Offerings page"
 **Interfaces:**
 - Consumes: `PageLayout`.
 
-- [ ] **Step 1: Create `src/pages/standards.astro`**
+- [x] **Step 1: Create `src/pages/standards.astro`**
 
 ```astro
 ---
@@ -1151,7 +1169,7 @@ import PageLayout from '../layouts/PageLayout.astro';
 </style>
 ```
 
-- [ ] **Step 2: Create `src/pages/community.astro`**
+- [x] **Step 2: Create `src/pages/community.astro`**
 
 ```astro
 ---
@@ -1177,7 +1195,7 @@ import Button from '../components/Button.astro';
 </style>
 ```
 
-- [ ] **Step 3: Extend `tests/pages.spec.ts`**
+- [x] **Step 3: Extend `tests/pages.spec.ts`**
 
 ```ts
 test('standards page links to the GitHub org', async ({ page }) => {
@@ -1193,12 +1211,12 @@ test('community page explains the flagship and links to get-involved', async ({ 
 });
 ```
 
-- [ ] **Step 4: Run tests (verify they pass)**
+- [x] **Step 4: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/pages.spec.ts`
 Expected: 4 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -1216,7 +1234,7 @@ git commit -m "feat: add Standards and Community pages"
 **Interfaces:**
 - Consumes: `PageLayout`, `SUPPORT` from `consts.ts`.
 
-- [ ] **Step 1: Create `src/pages/get-involved.astro`**
+- [x] **Step 1: Create `src/pages/get-involved.astro`**
 
 ```astro
 ---
@@ -1253,7 +1271,7 @@ const ROLES = [
 </style>
 ```
 
-- [ ] **Step 2: Create `src/pages/support.astro`**
+- [x] **Step 2: Create `src/pages/support.astro`**
 
 ```astro
 ---
@@ -1288,7 +1306,7 @@ import { SUPPORT } from '../consts';
 </style>
 ```
 
-- [ ] **Step 3: Extend `tests/pages.spec.ts`**
+- [x] **Step 3: Extend `tests/pages.spec.ts`**
 
 ```ts
 test('get-involved offers a mentor role anchor', async ({ page }) => {
@@ -1305,12 +1323,12 @@ test('support page shows all configured giving avenues', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 4: Run tests (verify they pass)**
+- [x] **Step 4: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/pages.spec.ts`
 Expected: 6 passed.
 
-- [ ] **Step 5: Commit**
+- [x] **Step 5: Commit**
 
 ```bash
 git add -A
@@ -1329,7 +1347,7 @@ git commit -m "feat: add Get Involved and Support pages"
 - Consumes: `PageLayout`, `astro:content` (`getCollection`, `render`).
 - Produces: collection `dispatches` with schema `{ title:string; description:string; date:Date; draft?:boolean }`. Post URLs are `/dispatches/<slug>`.
 
-- [ ] **Step 1: Create `src/content.config.ts`**
+- [x] **Step 1: Create `src/content.config.ts`**
 
 ```ts
 import { defineCollection, z } from 'astro:content';
@@ -1348,7 +1366,7 @@ const dispatches = defineCollection({
 export const collections = { dispatches };
 ```
 
-- [ ] **Step 2: Create the seed post `src/content/dispatches/welcome.md`**
+- [x] **Step 2: Create the seed post `src/content/dispatches/welcome.md`**
 
 ```markdown
 ---
@@ -1364,7 +1382,7 @@ at a time.
 More soon. If the mission moves you, [there's room for you here](/get-involved).
 ```
 
-- [ ] **Step 3: Create the list page `src/pages/dispatches/index.astro`**
+- [x] **Step 3: Create the list page `src/pages/dispatches/index.astro`**
 
 ```astro
 ---
@@ -1403,7 +1421,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month:
 </style>
 ```
 
-- [ ] **Step 4: Create the post route `src/pages/dispatches/[...slug].astro`**
+- [x] **Step 4: Create the post route `src/pages/dispatches/[...slug].astro`**
 
 ```astro
 ---
@@ -1436,7 +1454,7 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month:
 </style>
 ```
 
-- [ ] **Step 5: Write failing `tests/dispatches.spec.ts`**
+- [x] **Step 5: Write failing `tests/dispatches.spec.ts`**
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -1454,12 +1472,12 @@ test('a dispatch post renders its body and a back link', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 6: Run tests (verify they pass)**
+- [x] **Step 6: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/dispatches.spec.ts`
 Expected: 2 passed.
 
-- [ ] **Step 7: Commit**
+- [x] **Step 7: Commit**
 
 ```bash
 git add -A
@@ -1477,7 +1495,7 @@ git commit -m "feat: add Dispatches blog (collection, index, post route, seed po
 **Interfaces:**
 - Consumes: `BaseLayout`, `Button`.
 
-- [ ] **Step 1: Create `src/pages/404.astro`**
+- [x] **Step 1: Create `src/pages/404.astro`**
 
 ```astro
 ---
@@ -1500,7 +1518,7 @@ import Button from '../components/Button.astro';
 </style>
 ```
 
-- [ ] **Step 2: Create `public/favicon.svg`** (piano-black tile with a green "T.")
+- [x] **Step 2: Create `public/favicon.svg`** (piano-black tile with a green "T.")
 
 ```svg
 <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
@@ -1510,7 +1528,7 @@ import Button from '../components/Button.astro';
 </svg>
 ```
 
-- [ ] **Step 3: Create `public/robots.txt`**
+- [x] **Step 3: Create `public/robots.txt`**
 
 ```text
 User-agent: *
@@ -1519,7 +1537,7 @@ Allow: /
 Sitemap: https://thinkersjournal.com/sitemap-index.xml
 ```
 
-- [ ] **Step 4: Extend `tests/pages.spec.ts` with a 404 assertion**
+- [x] **Step 4: Extend `tests/pages.spec.ts` with a 404 assertion**
 
 ```ts
 test('unknown routes render the branded 404', async ({ page }) => {
@@ -1529,12 +1547,12 @@ test('unknown routes render the branded 404', async ({ page }) => {
 });
 ```
 
-- [ ] **Step 5: Run tests (verify they pass)**
+- [x] **Step 5: Run tests (verify they pass)**
 
 Run: `npx playwright test tests/pages.spec.ts`
 Expected: 7 passed. (Astro serves `404.astro` for unknown routes under `astro dev`.)
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
@@ -1552,7 +1570,7 @@ git commit -m "feat: add 404 page, favicon, robots.txt"
 **Interfaces:**
 - Consumes: every route built in prior tasks.
 
-- [ ] **Step 1: Write `tests/a11y.spec.ts` (axe across all routes)**
+- [x] **Step 1: Write `tests/a11y.spec.ts` (axe across all routes)**
 
 ```ts
 import { test, expect } from '@playwright/test';
@@ -1572,34 +1590,34 @@ for (const route of ROUTES) {
 }
 ```
 
-- [ ] **Step 2: Run the a11y sweep**
+- [x] **Step 2: Run the a11y sweep**
 
 Run: `npx playwright test tests/a11y.spec.ts`
 Expected: all routes pass. If any fail, fix the offending markup (commonly: color contrast, missing landmark, or link-name) and re-run.
 
-- [ ] **Step 3: Run the full test suite**
+- [x] **Step 3: Run the full test suite**
 
 Run: `npm test`
 Expected: all specs green (smoke, chrome, home, pages, dispatches, a11y).
 
-- [ ] **Step 4: Type/diagnostics check**
+- [x] **Step 4: Type/diagnostics check**
 
 Run: `npm run check`
 Expected: `astro check` reports 0 errors.
 
-- [ ] **Step 5: Production build**
+- [x] **Step 5: Production build**
 
 Run: `npm run build`
 Expected: build succeeds; `dist/` contains `index.html`, each page, `dispatches/welcome/index.html`, and `sitemap-index.xml`.
 
-- [ ] **Step 6: Commit**
+- [x] **Step 6: Commit**
 
 ```bash
 git add -A
 git commit -m "test: full-site accessibility sweep; verify type check and build"
 ```
 
-- [ ] **Step 7: Push**
+- [x] **Step 7: Push**
 
 ```bash
 git push

@@ -1,8 +1,18 @@
 # Thinker's Journal — Website Design Spec
 
 - **Date:** 2026-07-13
-- **Status:** Approved design, ready for implementation planning
+- **Status:** **IMPLEMENTED** — the site this spec describes was built and is live on
+  Cloudflare Pages (PRs #1–#10). This document is the design record, not a work item.
 - **Scope:** The public **marketing/mission website** only (project ① of 2). The **Community platform** (project ②) is a separate, later design cycle — see "Relationship to the platform" below.
+
+> ⚠ **DISCHARGED 2026-09-05.** The Status field above read *“Approved design, ready for
+> implementation planning”* until today. The implementation plan was written the same day
+> (`docs/superpowers/plans/2026-07-13-thinkers-journal-website.md`), executed, and shipped:
+> the site has been live on Cloudflare Pages through PRs #1–#10. **So the most authoritative
+> field in this spec went on inviting a planning cycle that had already happened.** The
+> design content below is unchanged and is still the reference; only the state claims are
+> corrected. Replaced rather than annotated, and `tests/docs-artifacts.spec.ts` now fails if
+> the old wording returns.
 
 ---
 
@@ -123,13 +133,17 @@ One emotional arc — *problem → promise → proof → invitation.* The **appr
 
 ## 11. Open questions / to confirm later
 
-- Create the actual **Open Collective / GitHub Sponsors / Ko-fi** accounts and wire real links (placeholders until then).
+- **PARTLY RESOLVED 2026-09-05** — ~~Create the actual **Open Collective / GitHub Sponsors / Ko-fi** accounts and wire real links (placeholders until then).~~ **Open Collective and Ko-fi are live** and their links resolve (`SUPPORT` in `src/consts.ts`, `live: true`); **GitHub Sponsors is the only one still pending**, and is hidden from the site rather than rendered as a dead link. `tests/pages.spec.ts` covers both states.
 - Founder's full **About** content for `/mission` (user to provide).
-- Whether to ship the **live donation total** island at launch or after.
+- ~~Whether to ship the **live donation total** island at launch or after.~~ **RESOLVED 2026-09-05** — shipped as a progressive, threshold-gated island (`functions/api/oc-total.js` + `/support`, PR #6). It degrades to no number, never to $0.
 - Custom **logo** (typographic wordmark until then).
 
-## 12. Next steps
+## 12. Next steps — **ALL DISCHARGED 2026-09-05**
 
-1. User reviews this spec.
-2. Invoke the **writing-plans** skill to produce a detailed implementation plan (scaffold Astro, tokens/design system, components, page-by-page build, Cloudflare Pages + DNS, content authoring).
-3. Initialize git and push to the `thinkersjournal` GitHub org when the build begins.
+Kept as the record of how the work was sequenced. **None of these is outstanding.**
+
+1. ~~User reviews this spec.~~ **Done** — approved; the plan was written the same day.
+2. ~~Invoke the **writing-plans** skill to produce a detailed implementation plan.~~ **Done** —
+   `docs/superpowers/plans/2026-07-13-thinkers-journal-website.md`, 12 TDD tasks, executed.
+3. ~~Initialize git and push to the `thinkersjournal` GitHub org when the build begins.~~
+   **Done** — `ThinkersJournal/ThinkersJournal.com`, live on Cloudflare Pages.
