@@ -8,7 +8,9 @@ step 7 activates the live form **automatically — no redeploy**.
 ## The contract the site expects
 `functions/api/subscribe.js` calls Listmonk's admin API:
 
-- **Auth:** `Authorization: token <LISTMONK_API_USER>:<LISTMONK_API_TOKEN>` (Listmonk v3+ API users).
+- **Auth:** `Authorization: token <LISTMONK_API_USER>:<LISTMONK_API_TOKEN>`. Listmonk supports
+  **both** this token header and HTTP BasicAuth with the same `api_user:token` credentials
+  (`curl -u "api_user:token"`); the function uses the token header. Either works.
 - **Request:** `POST {LISTMONK_URL}/api/subscribers` with
   `{ email, name, lists: [<LISTMONK_LIST_ID>], status: "enabled", preconfirm_subscriptions: false }`.
 - **Double opt-in:** the list must be configured **opt-in = double**, so Listmonk sends
@@ -39,6 +41,13 @@ Verify these against the Listmonk version you install; adjust the function if th
    - `LISTMONK_API_TOKEN` (secret)
    - `LISTMONK_LIST_ID` (the numeric list id)
 
-   Readiness flips to `configured: true` and the live signup form appears on `/dispatches`
-   on its own. Note the site's HTML is edge-cached ~4h — **purge the Cloudflare cache** if
-   you want the change visible to visitors immediately.
+8. **Trigger a redeploy.** Cloudflare Pages binds env vars **at deploy time** — an existing
+   deployment will NOT see newly-set vars. After step 7, create a new deployment (Pages →
+   Deployments → *Retry deployment* / *Create deployment*, or push any commit). Only then
+   does `GET /api/subscribe` report `configured: true` and the live form replace the fallback.
+
+9. **Purge the cache (or wait ~4h).** ⚠️ The site's HTML is edge-cached ~4 hours, so even
+   after the redeploy the **cached `/dispatches` will keep showing the static `hello@`
+   fallback** until the cache expires or you purge it. Do not conclude the wiring is broken
+   from a stale page — **cache-bust** (`/dispatches/?x=1`) to see the true deployed state,
+   and **purge the Cloudflare cache** to make the live form appear for everyone immediately.
