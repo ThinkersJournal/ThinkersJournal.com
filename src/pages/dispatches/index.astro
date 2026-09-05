@@ -21,7 +21,71 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month:
       </li>
     ))}
   </ul>
+  <section class="signup" aria-labelledby="signup-h">
+    <h2 id="signup-h" class="signup-h">Get new Dispatches by email</h2>
+    <p id="signup-fallback" class="signup-note">
+      Prefer email? We're setting up a newsletter — reach out at
+      <a class="link" href="mailto:hello@thinkersjournal.com">hello@thinkersjournal.com</a>
+      to be added when it launches.
+    </p>
+    <form id="signup-form" class="signup-form" hidden novalidate>
+      <input id="signup-email" name="email" type="email" required autocomplete="email"
+        aria-label="Email address" placeholder="you@example.com" />
+      <button type="submit">Subscribe</button>
+    </form>
+    <p id="signup-status" class="signup-status" role="status" aria-live="polite" hidden></p>
+  </section>
 </PageLayout>
+<script>
+  // Progressive newsletter signup. The form is revealed only when the backend reports
+  // configured (GET /api/subscribe → { configured }); until then the static hello@
+  // fallback stays. Submit POSTs and shows an honest status — never a false success.
+  const form = document.getElementById('signup-form') as HTMLFormElement | null;
+  const fallback = document.getElementById('signup-fallback');
+  const status = document.getElementById('signup-status');
+  const emailEl = document.getElementById('signup-email') as HTMLInputElement | null;
+  const say = (msg: string) => { if (status) { status.textContent = msg; status.hidden = false; } };
+
+  fetch('/api/subscribe')
+    .then((r) => (r.ok ? r.json() : null))
+    .then((d) => {
+      if (d && d.configured === true && form && fallback) {
+        fallback.hidden = true;
+        form.hidden = false;
+      }
+    })
+    .catch(() => { /* keep the fallback */ });
+
+  if (form && emailEl) {
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+      const email = (emailEl.value || '').trim();
+      if (!email || !emailEl.checkValidity()) { emailEl.reportValidity(); return; }
+      const btn = form.querySelector('button');
+      if (btn) btn.disabled = true;
+      say('Signing you up…');
+      try {
+        const r = await fetch('/api/subscribe', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ email }),
+        });
+        const d = await r.json().catch(() => null);
+        if (d && d.ok) {
+          form.hidden = true;
+          say('Almost there — check your inbox to confirm your subscription.');
+          return;
+        }
+        say(d && d.reason === 'invalid'
+          ? 'That email address looks off — mind checking it?'
+          : 'Couldn’t sign you up just now. Please try again, or email hello@thinkersjournal.com.');
+      } catch {
+        say('Couldn’t sign you up just now. Please try again, or email hello@thinkersjournal.com.');
+      }
+      if (btn) btn.disabled = false;
+    });
+  }
+</script>
 <style>
   .list{list-style:none;max-width:70ch}
   .list li{border-top:1px solid var(--line)}
@@ -31,4 +95,17 @@ const fmt = (d: Date) => d.toLocaleDateString('en-US', { year: 'numeric', month:
   .date{display:block;font-size:12.5px;letter-spacing:.06em;text-transform:uppercase;color:var(--dim)}
   .title{display:block;font-family:var(--serif);font-size:22px;color:var(--head);margin-top:6px;transition:color .15s}
   .desc{display:block;color:var(--muted);font-size:15.5px;margin-top:8px}
+  .signup{margin-top:56px;padding-top:32px;border-top:1px solid var(--line);max-width:70ch}
+  .signup-h{font-family:var(--serif);font-size:22px;color:var(--head);margin-bottom:12px}
+  .signup-note{color:var(--muted);font-size:15.5px;max-width:60ch}
+  .signup-form{display:flex;gap:10px;flex-wrap:wrap;margin-top:4px}
+  .signup-form input{flex:1 1 240px;min-width:0;padding:12px 14px;border:1px solid var(--line);
+    border-radius:10px;background:var(--ink2);color:var(--head);font-size:15px}
+  .signup-form input::placeholder{color:var(--dim)}
+  .signup-form input:focus-visible{outline:2px solid var(--green);outline-offset:1px;border-color:transparent}
+  .signup-form button{padding:12px 20px;border:0;border-radius:10px;background:var(--green);
+    color:var(--on-green,#04150d);font-weight:600;font-size:15px;cursor:pointer}
+  .signup-form button:disabled{opacity:.6;cursor:default}
+  .signup-status{color:var(--muted);font-size:15px;margin-top:12px}
+  .signup [hidden]{display:none}
 </style>
