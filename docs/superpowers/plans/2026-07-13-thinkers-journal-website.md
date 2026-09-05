@@ -3,8 +3,8 @@
 > # ⚠ EXECUTED — HISTORICAL RECORD, NOT A WORK QUEUE
 >
 > **This plan was carried out in full and the site it describes is live on Cloudflare Pages.**
-> **Do not implement it.** Every one of the 34 files its steps create exists in the tree, and
-> the work shipped through PRs #1–#10.
+> **Do not implement it.** Its steps name **42** files; every one of the 42 exists in the
+> tree, and the work shipped through PRs #1–#10.
 >
 > ⚠ **DISCHARGED 2026-09-05.** Until today this document opened with *“REQUIRED SUB-SKILL: Use
 > superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to
