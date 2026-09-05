@@ -20,9 +20,11 @@ function config(env) {
   const url = env && env.LISTMONK_URL;
   const user = env && env.LISTMONK_API_USER;
   const token = env && env.LISTMONK_API_TOKEN;
-  const listId = env && env.LISTMONK_LIST_ID;
-  if (!url || !user || !token || !listId) return null;
-  return { url: String(url).replace(/\/+$/, ''), user, token, listId: Number(listId) };
+  const listId = Number(env && env.LISTMONK_LIST_ID);
+  // A non-numeric LISTMONK_LIST_ID must read as UNCONFIGURED, not a broken
+  // configured:true that would show a form whose submissions all fail.
+  if (!url || !user || !token || !Number.isInteger(listId) || listId <= 0) return null;
+  return { url: String(url).replace(/\/+$/, ''), user, token, listId };
 }
 
 const json = (obj, status = 200) =>
