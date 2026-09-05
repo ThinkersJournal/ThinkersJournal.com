@@ -1,0 +1,16 @@
+# Cloudflare Pages security headers, applied to every route.
+#
+# CSP ships REPORT-ONLY on purpose: Astro inlines the small island scripts
+# (<script type="module"> in the built HTML), which `script-src 'self'` will FLAG in a
+# browser's console without blocking anything. Before promoting to an enforcing
+# Content-Security-Policy, externalize or hash those inline scripts and confirm zero
+# violations in DevTools. Report-only cannot break the site; enforcing can, silently.
+#
+# HSTS (Strict-Transport-Security) is intentionally NOT set here — it stays a Cloudflare
+# dashboard toggle (founder's call).
+/*
+  X-Frame-Options: DENY
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
+  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; form-action 'self'
