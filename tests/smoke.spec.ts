@@ -22,3 +22,11 @@ test('home exposes social-share (Open Graph + Twitter) meta', async ({ page }) =
   await expect(page.locator('meta[name="twitter:card"]'))
     .toHaveAttribute('content', 'summary_large_image');
 });
+
+test('canonical + og:url use the www canonical host', async ({ page }) => {
+  await page.goto('/');
+  await expect(page.locator('link[rel="canonical"]'))
+    .toHaveAttribute('href', 'https://www.thinkersjournal.com/');
+  await expect(page.locator('meta[property="og:url"]'))
+    .toHaveAttribute('content', 'https://www.thinkersjournal.com/');
+});
