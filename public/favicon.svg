@@ -1,5 +1,8 @@
-<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64">
-  <rect width="64" height="64" rx="14" fill="#060608"/>
-  <text x="15" y="45" font-family="Georgia, serif" font-size="38" fill="#f3f3f5">T</text>
-  <circle cx="46" cy="42" r="4.5" fill="#3dff95"/>
-</svg>
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100" role="img" aria-label="Thinker's Journal"><title>Thinker's Journal</title><rect width="100" height="100" rx="22" fill="#3dff95"/><g transform="translate(50 50) scale(.62) translate(-50 -50)">
+  <g fill="none" stroke="#060608" stroke-width="4.5" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M50 37 C40 30 27 26 14 27 L14 61 C27 60 40 64 50 71 Z"/>
+    <path d="M50 37 C60 30 73 26 86 27 L86 61 C73 60 60 64 50 71 Z"/>
+    <path d="M18.5 64.3 C29 63.7 39.5 66.7 48.6 72"/>
+    <path d="M81.5 64.3 C71 63.7 60.5 66.7 51.4 72"/>
+  </g>
+  <path d="M62.5 33.6 L71 32.2 L71 58.6 L66.8 54.4 L62.5 58.9 Z" fill="#060608"/></g></svg>
