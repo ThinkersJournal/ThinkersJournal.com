@@ -19,11 +19,11 @@ const postReq = (body: unknown) =>
 
 test.describe('subscribe Pages Function (unit)', () => {
   test('GET is configured only when all env vars are valid', async () => {
-    expect((await readJson(await onRequestGet({ env: ENV }))).configured).toBe(true);
-    expect((await readJson(await onRequestGet({ env: {} }))).configured).toBe(false);
+    expect((await readJson(onRequestGet({ env: ENV }))).configured).toBe(true);
+    expect((await readJson(onRequestGet({ env: {} }))).configured).toBe(false);
     // a non-numeric list id must read as unconfigured, never a broken configured:true
-    expect((await readJson(await onRequestGet({ env: { ...ENV, LISTMONK_LIST_ID: 'abc' } }))).configured).toBe(false);
-    expect((await readJson(await onRequestGet({ env: { ...ENV, LISTMONK_LIST_ID: '0' } }))).configured).toBe(false);
+    expect((await readJson(onRequestGet({ env: { ...ENV, LISTMONK_LIST_ID: 'abc' } }))).configured).toBe(false);
+    expect((await readJson(onRequestGet({ env: { ...ENV, LISTMONK_LIST_ID: '0' } }))).configured).toBe(false);
   });
 
   test('POST rejects an invalid email without calling Listmonk', async () => {
