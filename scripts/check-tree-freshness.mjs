@@ -231,14 +231,34 @@ export const MESSAGES = {
 `,
 };
 
+// Look up a verdict's template, rejecting anything the table does not OWN.
+//
+// ⚠️ `MESSAGES[kind]` was the wrong test and its guard `if (!template)` did not do what
+// its comment claimed. Measured 2026-09-09: four INHERITED keys are truthy and slip past
+// it — "constructor" is callable and returns "[object Object]", "toString" returns
+// "[object Undefined]", and "valueOf"/"__proto__" throw. So the branch that exists to
+// report a missing template instead printed garbage or crashed.
+//
+// This is the exemption rule from this same file, one level up and biting its author:
+// the property ASSUMED was `kind is a verdict assess() can produce`; the property TESTED
+// was `kind indexes this object, prototype chain included`. They agree on every value the
+// tests generate and come apart on exactly the keys no test generates.
+//
+// NOT a security hole: `kind` comes from assess(), which returns only four literals
+// (pinned by a test below), and this is a dev-time script. The defect is correctness —
+// the guard's stated purpose fails on four inputs.
+export function messageFor(kind) {
+  return Object.hasOwn(MESSAGES, kind) ? MESSAGES[kind] : null;
+}
+
 function report(kind, branch, behind) {
   const head = git('rev-parse', '--short', 'HEAD');
   const remote = git('rev-parse', '--short', 'origin/main');
-  const template = MESSAGES[kind];
+  const template = messageFor(kind);
   if (!template) {
-    // Unreachable while tests hold: freshness.spec.ts asserts every verdict assess() can
-    // produce has a template. Kept so a future verdict fails LOUDLY rather than exiting 1
-    // with no explanation.
+    // Unreachable while the tests hold: freshness.spec.ts enumerates every verdict
+    // assess() can produce and requires a template for each. Kept so a FUTURE verdict
+    // fails loudly rather than exiting 1 with no explanation.
     console.error(`\n  freshness: verdict '${kind}' has no message — that is a bug in this script.\n`);
     return;
   }

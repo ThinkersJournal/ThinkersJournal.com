@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 // The tree-freshness guard. It shipped untested in PR #16 and its exemption hole was
 // found by a human walking into it — so the decision is pinned here, AND exercised
 // end-to-end against a real squash-merged repository.
-import { assess, parseTreeOid, MESSAGES } from '../scripts/check-tree-freshness.mjs';
+import { assess, parseTreeOid, MESSAGES, messageFor } from '../scripts/check-tree-freshness.mjs';
 
 const GUARD = resolve('scripts/check-tree-freshness.mjs');
 
@@ -150,6 +150,42 @@ test.describe('message table covers every verdict', () => {
     expect(MESSAGES['spent-branch'](ctx)).toContain('nothing is lost');
     expect(MESSAGES['deleted-upstream'](ctx)).not.toContain('nothing is lost');
     expect(MESSAGES['deleted-upstream'](ctx)).toContain('git log --oneline origin/main..HEAD');
+  });
+
+  // ⚠️ BORN FROM A REAL DEFECT (Codacy on #22, measured 2026-09-09). The lookup was
+  // `MESSAGES[kind]` guarded by `if (!template)`, and four INHERITED keys defeat that:
+  // "constructor" is callable and yields "[object Object]", "toString" yields
+  // "[object Undefined]", "valueOf" and "__proto__" throw. The branch whose whole job is
+  // to report a missing template printed garbage or crashed instead.
+  //
+  // The property ASSUMED was "kind is a verdict"; the property TESTED was "kind indexes
+  // this object, prototype included". They agree on every value the other tests generate.
+  test('inherited keys are rejected, not treated as templates', () => {
+    for (const k of ['constructor', 'toString', 'valueOf', '__proto__', 'hasOwnProperty']) {
+      expect(messageFor(k)).toBeNull();
+    }
+  });
+
+  test('a real verdict still resolves — control, so the rejection is not blanket', () => {
+    expect(typeof messageFor('spent-branch')).toBe('function');
+    expect(messageFor('unknown-verdict')).toBeNull();
+  });
+
+  // Pins the reachability claim rather than asserting it in prose: assess() emits only
+  // these four strings, so no prototype key can reach the lookup in practice. If a future
+  // verdict is added, this fails and the coverage test above is what catches the message.
+  test('assess emits only literal verdict names', () => {
+    const kinds = new Set<string>();
+    for (const branch of ['main', 'feat/x']) {
+      for (const behind of [0, 3]) {
+        for (const contributes of [true, false]) {
+          for (const upstreamGone of [true, false]) {
+            kinds.add(assess({ branch, behind, contributes, upstreamGone }).kind);
+          }
+        }
+      }
+    }
+    expect([...kinds].sort()).toEqual(['deleted-upstream', 'ok', 'spent-branch', 'stale-main']);
   });
 });
 
