@@ -84,14 +84,20 @@ function headContributes() {
   // exact ERR-vs-0 bug this file preaches against, inside the file that preaches it.
   // Both outcomes carry stdout, so read the tree id rather than the exit status.
   let stdout;
+  let gitSaid = '';
   try {
-    stdout = execFileSync('git', ['merge-tree', '--write-tree', 'origin/main', 'HEAD'], { encoding: 'utf8' });
+    stdout = execFileSync('git', ['merge-tree', '--write-tree', 'origin/main', 'HEAD'],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
   } catch (e) {
     stdout = e?.stdout ?? ''; // a CONFLICT exits non-zero and still prints the oid
+    gitSaid = String(e?.stderr ?? '').split(/\r?\n/)[0].trim();
   }
   const merged = parseTreeOid(stdout);
   if (merged === null) {
-    notVerified('`git merge-tree --write-tree` returned no tree id (git older than 2.38, or the command failed), so whether this branch still carries unmerged work is unknown.');
+    // git's own line is CARRIED into the diagnostic rather than discarded — it names the
+    // real cause (unknown option `write-tree' on git < 2.38) far better than a guess can.
+    const because = gitSaid ? ` — git said: ${gitSaid}` : ' (git older than 2.38?)';
+    notVerified(`\`git merge-tree --write-tree\` returned no tree id, so whether this branch still carries unmerged work is unknown${because}.`);
   }
   const mainTree = parseTreeOid(git('rev-parse', 'origin/main^{tree}'));
   if (mainTree === null) notVerified('could not read origin/main^{tree}.');
@@ -118,8 +124,10 @@ function upstreamDeleted(branch) {
   // conflict fixture, which is cut exactly that way.
   let ref, remote;
   try {
-    ref = execFileSync('git', ['config', '--get', `branch.${branch}.merge`], { encoding: 'utf8' }).trim();
-    remote = execFileSync('git', ['config', '--get', `branch.${branch}.remote`], { encoding: 'utf8' }).trim();
+    const cfg = (k) => execFileSync('git', ['config', '--get', k],
+      { encoding: 'utf8', stdio: ['ignore', 'pipe', 'ignore'] }).trim();
+    ref = cfg(`branch.${branch}.merge`);
+    remote = cfg(`branch.${branch}.remote`);
   } catch {
     return false; // never pushed / no tracking -> work may be purely local, stay quiet
   }
@@ -128,8 +136,13 @@ function upstreamDeleted(branch) {
   // says nothing about this branch having been merged and cleaned up.
   if (ref !== `refs/heads/${branch}`) return false;
   try {
+    // stderr IGNORED, not merely unused: measured 2026-09-09, execFileSync forwards
+    // git's stderr to the parent, so a network blip prints five lines of
+    // "fatal: Could not read from remote repository / check your access rights"
+    // during `npm test` while this probe silently and correctly falls back. That reads
+    // as a failure when nothing is wrong.
     return execFileSync('git', ['ls-remote', '--heads', remote, ref],
-      { encoding: 'utf8', timeout: 10_000 }).trim() === '';
+      { encoding: 'utf8', timeout: 10_000, stdio: ['ignore', 'pipe', 'ignore'] }).trim() === '';
   } catch {
     // A read-only probe that could not run. Returning false only withholds an EXTRA
     // warning; the primary merge-tree verdict is already computed, so this is not an
@@ -168,11 +181,12 @@ function probe() {
   return { branch, behind, contributes: headContributes(), upstreamGone: upstreamDeleted(branch) };
 }
 
-function report(kind, branch, behind) {
-  const head = git('rev-parse', '--short', 'HEAD');
-  const remote = git('rev-parse', '--short', 'origin/main');
-  if (kind === 'stale-main') {
-    console.error(`
+// One template per verdict, keyed by the kind assess() returns. A table rather than an
+// if/else chain so the mapping is explicit and a verdict shipping WITHOUT a message is a
+// missing key instead of a silently-taken else branch — which matters, because this file
+// has now grown a third verdict and will grow more.
+export const MESSAGES = {
+  'stale-main': ({ behind, head, remote }) => `
   STALE TREE — local main is ${behind} commit(s) behind origin/main.
 
     HEAD         ${head}
@@ -182,27 +196,9 @@ function report(kind, branch, behind) {
   green. Fast-forward before trusting any file read or commit list:
 
     git merge --ff-only origin/main
-`);
-    return;
-  }
-  if (kind === 'deleted-upstream') {
-    console.error(`
-  STALE TREE — '${branch}' no longer exists on the remote (it was pushed once and has
-  since been deleted, which here means its PR merged), while origin/main is ${behind}
-  commit(s) ahead.
+`,
 
-    HEAD         ${head}  (${branch})
-    origin/main  ${remote}
-
-  Unlike a branch that contributes nothing, this one still differs from origin/main — so
-  check before you leave, because the difference may be work you never pushed:
-
-    git log --oneline origin/main..HEAD
-    git checkout main && git merge --ff-only origin/main
-`);
-    return;
-  }
-  console.error(`
+  'spent-branch': ({ branch, behind, head, remote }) => `
   STALE TREE — you are on '${branch}', which contributes NOTHING that origin/main does
   not already have, while origin/main is ${behind} commit(s) ahead.
 
@@ -217,7 +213,36 @@ function report(kind, branch, behind) {
   Nothing here is unmerged, so nothing is lost by leaving:
 
     git checkout main && git merge --ff-only origin/main
-`);
+`,
+
+  'deleted-upstream': ({ branch, behind, head, remote }) => `
+  STALE TREE — '${branch}' no longer exists on the remote (it was pushed once and has
+  since been deleted, which here means its PR merged), while origin/main is ${behind}
+  commit(s) ahead.
+
+    HEAD         ${head}  (${branch})
+    origin/main  ${remote}
+
+  Unlike a branch that contributes nothing, this one still differs from origin/main — so
+  check before you leave, because the difference may be work you never pushed:
+
+    git log --oneline origin/main..HEAD
+    git checkout main && git merge --ff-only origin/main
+`,
+};
+
+function report(kind, branch, behind) {
+  const head = git('rev-parse', '--short', 'HEAD');
+  const remote = git('rev-parse', '--short', 'origin/main');
+  const template = MESSAGES[kind];
+  if (!template) {
+    // Unreachable while tests hold: freshness.spec.ts asserts every verdict assess() can
+    // produce has a template. Kept so a future verdict fails LOUDLY rather than exiting 1
+    // with no explanation.
+    console.error(`\n  freshness: verdict '${kind}' has no message — that is a bug in this script.\n`);
+    return;
+  }
+  console.error(template({ branch, behind, head, remote }));
 }
 
 // Wrapped so that IMPORTING this module for `assess`/`parseTreeOid` does not run the
