@@ -54,17 +54,48 @@ export function assess({ branch, behind, contributes }) {
   return { code: 0, kind: 'ok' };
 }
 
-// Everything below is the CLI. It is wrapped so that IMPORTING this module for `assess`
-// does not run the guard, fetch from origin, or call process.exit — a test that silently
-// executed the thing under test would be worse than no test.
-function main() {
-  const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
-  const notVerified = (why) => {
-    console.error(`\n  freshness: NOT VERIFIED — ${why}`);
-    console.error('  This is not a pass. Your tree may be stale; re-check before trusting a file read.\n');
-    process.exit(0);
-  };
+// merge-tree prints the resulting tree oid on stdout. Measured with git 2.55 on
+// 2026-09-09: a CLEAN merge exits 0 with the oid; a CONFLICTING merge exits 1 and STILL
+// prints a valid oid; an unsupported flag (git < 2.38) exits 129 with a usage message and
+// no oid at all. So the discriminator is "did we get a tree id", never the exit code.
+// SHA-1 repos give 40 hex chars, SHA-256 repos give 64.
+export function parseTreeOid(stdout) {
+  const first = String(stdout ?? '').split(/\r?\n/)[0].trim();
+  return /^(?:[0-9a-f]{40}|[0-9a-f]{64})$/.test(first) ? first : null;
+}
 
+const git = (...args) => execFileSync('git', args, { encoding: 'utf8' }).trim();
+
+const notVerified = (why) => {
+  console.error(`\n  freshness: NOT VERIFIED — ${why}`);
+  console.error('  This is not a pass. Your tree may be stale; re-check before trusting a file read.\n');
+  process.exit(0);
+};
+
+// Does HEAD contribute anything origin/main does not already have?
+function headContributes() {
+  // NOTE: a bare try/catch here USED to swallow the old-git case and report a pass — the
+  // exact ERR-vs-0 bug this file preaches against, inside the file that preaches it.
+  // Both outcomes carry stdout, so read the tree id rather than the exit status.
+  let stdout;
+  try {
+    stdout = execFileSync('git', ['merge-tree', '--write-tree', 'origin/main', 'HEAD'], { encoding: 'utf8' });
+  } catch (e) {
+    stdout = e?.stdout ?? ''; // a CONFLICT exits non-zero and still prints the oid
+  }
+  const merged = parseTreeOid(stdout);
+  if (merged === null) {
+    notVerified('`git merge-tree --write-tree` returned no tree id (git older than 2.38, or the command failed), so whether this branch still carries unmerged work is unknown.');
+  }
+  const mainTree = parseTreeOid(git('rev-parse', 'origin/main^{tree}'));
+  if (mainTree === null) notVerified('could not read origin/main^{tree}.');
+  // A conflicted merge yields a tree containing conflict markers, which differs from
+  // origin/main's — correctly reading as "this branch carries work".
+  return merged !== mainTree;
+}
+
+// All the git probing, so main() stays decision + reporting.
+function probe() {
   let branch;
   try {
     branch = git('rev-parse', '--abbrev-ref', 'HEAD');
@@ -72,8 +103,7 @@ function main() {
     notVerified('could not read the current branch.');
   }
   // A detached HEAD has no branch, so neither rule applies and this check does not cover
-  // it. Say so rather than exiting 0 silently — an uncovered case reported as a pass is
-  // exactly the ERR-vs-0 bug above.
+  // it. Say so rather than exiting 0 silently.
   if (branch === 'HEAD') notVerified('HEAD is detached, so there is no branch to compare.');
 
   try {
@@ -90,28 +120,12 @@ function main() {
   }
   if (!Number.isInteger(behind)) notVerified('the commit count did not parse as a number.');
 
-  let contributes = true; // fail SAFE: if we cannot tell, assume real work and stay quiet
-  if (branch !== 'main') {
-    try {
-      const merged = git('merge-tree', '--write-tree', 'origin/main', 'HEAD').split('\n')[0].trim();
-      const mainTree = git('rev-parse', 'origin/main^{tree}');
-      if (!/^[0-9a-f]{40}$/.test(merged) || !/^[0-9a-f]{40}$/.test(mainTree)) {
-        notVerified('merge-tree did not return a tree id (git too old? needs 2.38+).');
-      }
-      contributes = merged !== mainTree;
-    } catch {
-      // A conflicting merge exits non-zero — and a branch that CONFLICTS with main
-      // definitely carries work, so the exemption is correct. Stay quiet.
-      contributes = true;
-    }
-  }
+  return { branch, behind, contributes: branch === 'main' ? true : headContributes() };
+}
 
-  const { code, kind } = assess({ branch, behind, contributes });
-  if (code === 0) process.exit(0);
-
+function report(kind, branch, behind) {
   const head = git('rev-parse', '--short', 'HEAD');
   const remote = git('rev-parse', '--short', 'origin/main');
-
   if (kind === 'stale-main') {
     console.error(`
   STALE TREE — local main is ${behind} commit(s) behind origin/main.
@@ -124,8 +138,9 @@ function main() {
 
     git merge --ff-only origin/main
 `);
-  } else {
-    console.error(`
+    return;
+  }
+  console.error(`
   STALE TREE — you are on '${branch}', which contributes NOTHING that origin/main does
   not already have, while origin/main is ${behind} commit(s) ahead.
 
@@ -133,7 +148,7 @@ function main() {
     origin/main  ${remote}
 
   Two ways this happens, same consequence: the branch already merged (this repo squashes,
-  so its commits are not ancestors of main and it will still look "unmerged" to
+  so its commits are not ancestors of main and it still looks "unmerged" to
   git branch --merged), or it was cut and never committed to. Either way this tree is
   missing ${behind} commit(s) of mainline work while every ref check reads green.
 
@@ -141,7 +156,16 @@ function main() {
 
     git checkout main && git merge --ff-only origin/main
 `);
-  }
+}
+
+// Wrapped so that IMPORTING this module for `assess`/`parseTreeOid` does not run the
+// guard, fetch from origin, or call process.exit — a test that silently executed the
+// thing under test would be worse than no test.
+function main() {
+  const { branch, behind, contributes } = probe();
+  const { code, kind } = assess({ branch, behind, contributes });
+  if (code === 0) process.exit(0);
+  report(kind, branch, behind);
   process.exit(1);
 }
 
