@@ -129,12 +129,12 @@ test.describe('message table covers every verdict', () => {
   });
 
   test('every failing verdict has a message template', () => {
-    for (const kind of KINDS) expect(Object.keys(MESSAGES)).toContain(kind);
+    for (const kind of KINDS) expect([...MESSAGES.keys()]).toContain(kind);
   });
 
   test('every template renders the branch, the count and both shas', () => {
-    for (const kind of Object.keys(MESSAGES) as (keyof typeof MESSAGES)[]) {
-      const out = MESSAGES[kind]({ branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' });
+    for (const [kind, template] of MESSAGES) {
+      const out = template({ branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' });
       expect(out).toContain('7');
       expect(out).toContain('aaa1111');
       expect(out).toContain('bbb2222');
@@ -147,12 +147,15 @@ test.describe('message table covers every verdict', () => {
   // one of them to lie. Pin the distinction that justifies keeping them separate.
   test('only spent-branch promises nothing is lost; deleted-upstream says look first', () => {
     const ctx = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
-    expect(MESSAGES['spent-branch'](ctx)).toContain('nothing is lost');
-    expect(MESSAGES['deleted-upstream'](ctx)).not.toContain('nothing is lost');
-    expect(MESSAGES['deleted-upstream'](ctx)).toContain('git log --oneline origin/main..HEAD');
+    expect(messageFor('spent-branch')!(ctx)).toContain('nothing is lost');
+    expect(messageFor('deleted-upstream')!(ctx)).not.toContain('nothing is lost');
+    expect(messageFor('deleted-upstream')!(ctx)).toContain('git log --oneline origin/main..HEAD');
   });
 
-  // ⚠️ BORN FROM A REAL DEFECT (Codacy on #22, measured 2026-09-09). The lookup was
+  // ⚠️ BORN FROM A REAL DEFECT (Codacy on #22, measured 2026-09-09). MESSAGES is now a
+  // Map, which has no prototype chain, so these keys CANNOT resolve — the test stays to
+  // pin that property, because a later refactor back to an object literal would silently
+  // reintroduce it. Historically the lookup was
   // `MESSAGES[kind]` guarded by `if (!template)`, and four INHERITED keys defeat that:
   // "constructor" is callable and yields "[object Object]", "toString" yields
   // "[object Undefined]", "valueOf" and "__proto__" throw. The branch whose whole job is

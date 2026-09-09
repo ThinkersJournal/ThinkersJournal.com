@@ -185,8 +185,8 @@ function probe() {
 // if/else chain so the mapping is explicit and a verdict shipping WITHOUT a message is a
 // missing key instead of a silently-taken else branch — which matters, because this file
 // has now grown a third verdict and will grow more.
-export const MESSAGES = {
-  'stale-main': ({ behind, head, remote }) => `
+export const MESSAGES = new Map([
+  ['stale-main', ({ behind, head, remote }) => `
   STALE TREE — local main is ${behind} commit(s) behind origin/main.
 
     HEAD         ${head}
@@ -196,9 +196,9 @@ export const MESSAGES = {
   green. Fast-forward before trusting any file read or commit list:
 
     git merge --ff-only origin/main
-`,
+`],
 
-  'spent-branch': ({ branch, behind, head, remote }) => `
+  ['spent-branch', ({ branch, behind, head, remote }) => `
   STALE TREE — you are on '${branch}', which contributes NOTHING that origin/main does
   not already have, while origin/main is ${behind} commit(s) ahead.
 
@@ -213,9 +213,9 @@ export const MESSAGES = {
   Nothing here is unmerged, so nothing is lost by leaving:
 
     git checkout main && git merge --ff-only origin/main
-`,
+`],
 
-  'deleted-upstream': ({ branch, behind, head, remote }) => `
+  ['deleted-upstream', ({ branch, behind, head, remote }) => `
   STALE TREE — '${branch}' no longer exists on the remote (it was pushed once and has
   since been deleted, which here means its PR merged), while origin/main is ${behind}
   commit(s) ahead.
@@ -228,27 +228,32 @@ export const MESSAGES = {
 
     git log --oneline origin/main..HEAD
     git checkout main && git merge --ff-only origin/main
-`,
-};
+`],
+]);
 
-// Look up a verdict's template, rejecting anything the table does not OWN.
+// Look up a verdict's template.
 //
-// ⚠️ `MESSAGES[kind]` was the wrong test and its guard `if (!template)` did not do what
-// its comment claimed. Measured 2026-09-09: four INHERITED keys are truthy and slip past
-// it — "constructor" is callable and returns "[object Object]", "toString" returns
-// "[object Undefined]", and "valueOf"/"__proto__" throw. So the branch that exists to
-// report a missing template instead printed garbage or crashed.
+// ⚠️ MESSAGES is a Map, not an object literal, and that is the whole point. The first
+// version indexed an object (`MESSAGES[kind]`) behind an `if (!template)` guard whose
+// comment claimed it caught unknown verdicts. Measured 2026-09-09, four INHERITED keys
+// walked straight through it, with FOUR DIFFERENT outcomes:
 //
-// This is the exemption rule from this same file, one level up and biting its author:
-// the property ASSUMED was `kind is a verdict assess() can produce`; the property TESTED
-// was `kind indexes this object, prototype chain included`. They agree on every value the
-// tests generate and come apart on exactly the keys no test generates.
+//   "constructor"  truthy, callable -> printed "[object Object]"
+//   "toString"     truthy, callable -> printed "[object Undefined]"
+//   "valueOf"      truthy           -> threw
+//   "__proto__"    truthy           -> threw
 //
-// NOT a security hole: `kind` comes from assess(), which returns only four literals
-// (pinned by a test below), and this is a dev-time script. The defect is correctness —
-// the guard's stated purpose fails on four inputs.
+// So the branch that exists to report a missing template printed garbage on two keys and
+// crashed on two others — while correctly rejecting "no-such-verdict", the only case
+// anyone would have tested.
+//
+// `Object.hasOwn` fixes that, and a Map is better than fixing it: a Map has NO prototype
+// chain to inherit through, so the defect is IMPOSSIBLE rather than guarded, and there is
+// no dynamic property access left for anyone to have to reason about. This file has
+// produced three assumed-property-vs-tested-property bugs in one day; the right response
+// to the third is to remove the class, not to add a third guard.
 export function messageFor(kind) {
-  return Object.hasOwn(MESSAGES, kind) ? MESSAGES[kind] : null;
+  return MESSAGES.get(kind) ?? null;
 }
 
 function report(kind, branch, behind) {
