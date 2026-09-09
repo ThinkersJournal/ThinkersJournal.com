@@ -9,6 +9,9 @@
   --dim:#7a7a85;
   --head:#fafafc;
   --emph:#e9e9ee;
+  /* Signature lift: between --muted and --emph. Used by both founder signatures
+     (home + /mission); it was hardcoded as #d6d6dc in both before this token existed. */
+  --sign:#d6d6dc;
   --on-green:#03130a;
   --line:rgba(255,255,255,.08);
   --serif:'Fraunces Variable',Georgia,'Times New Roman',serif;
