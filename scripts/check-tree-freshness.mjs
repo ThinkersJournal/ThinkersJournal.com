@@ -39,9 +39,9 @@ try {
 if (branch !== 'main') process.exit(0);
 
 try {
-  execFileSync('git', ['fetch', '--quiet', 'origin', 'main'], { stdio: 'ignore' });
+  execFileSync('git', ['fetch', '--quiet', 'origin', 'main'], { stdio: 'ignore', timeout: 10_000 });
 } catch {
-  notVerified('`git fetch` failed (offline?), so origin/main may itself be stale.');
+  notVerified('`git fetch` failed or timed out (offline? unresponsive remote?), so origin/main may itself be stale.');
 }
 
 let behind;
