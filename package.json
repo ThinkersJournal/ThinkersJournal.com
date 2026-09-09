@@ -6,6 +6,8 @@
   "private": true,
   "license": "MIT OR Apache-2.0",
   "scripts": {
+    "freshness": "node scripts/check-tree-freshness.mjs",
+    "pretest": "node scripts/check-tree-freshness.mjs",
     "dev": "astro dev",
     "build": "astro build",
     "preview": "astro preview",
