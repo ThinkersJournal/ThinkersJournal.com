@@ -6,13 +6,15 @@ import { join, resolve } from 'node:path';
 // The tree-freshness guard. It shipped untested in PR #16 and its exemption hole was
 // found by a human walking into it — so the decision is pinned here, AND exercised
 // end-to-end against a real squash-merged repository.
-import { assess, parseTreeOid } from '../scripts/check-tree-freshness.mjs';
+import { assess, parseTreeOid, MESSAGES, messageFor } from '../scripts/check-tree-freshness.mjs';
 
 const GUARD = resolve('scripts/check-tree-freshness.mjs');
 
 test.describe('tree-freshness decision (unit)', () => {
   const on = (branch: string, behind: number, contributes: boolean) =>
-    assess({ branch, behind, contributes });
+    assess({ branch, behind, contributes, upstreamGone: false });
+  const on2 = (branch: string, behind: number, contributes: boolean, upstreamGone: boolean) =>
+    assess({ branch, behind, contributes, upstreamGone });
 
   test('main behind origin/main fails — the original defect', () => {
     expect(on('main', 11, true)).toEqual({ code: 1, kind: 'stale-main' });
@@ -36,6 +38,29 @@ test.describe('tree-freshness decision (unit)', () => {
   // nothing is stale about it. `behind > 0` separates the two.
   test('a freshly cut branch on a current main passes', () => {
     expect(on('feat/new', 0, false).code).toBe(0);
+  });
+
+  // merge-tree DECAYS: once main edits the files a merged branch touched, merging it
+  // would change something, so it correctly reports "contributes" and the spent-branch
+  // rule stops firing. Measured 2026-09-09 on this repo — #21's own rewrite of
+  // check-tree-freshness.mjs blinded the guard to the branch that motivated it. The
+  // deleted-upstream signal does not decay, because a deleted ref stays deleted.
+  test('a merged branch whose remote is gone FAILS even when it still contributes', () => {
+    expect(on2('chore/done', 6, true, true)).toEqual({ code: 1, kind: 'deleted-upstream' });
+  });
+
+  test('a live branch with work and an intact remote stays exempt', () => {
+    expect(on2('feat/x', 40, true, false).code).toBe(0);
+  });
+
+  // Precedence: "contributes nothing" is the stronger statement, because only it can
+  // promise nothing is lost by leaving. The messages differ on exactly that point.
+  test('contributing nothing outranks the deleted remote', () => {
+    expect(on2('chore/done', 3, false, true).kind).toBe('spent-branch');
+  });
+
+  test('a deleted remote on a branch that is NOT behind still passes', () => {
+    expect(on2('chore/done', 0, true, true).code).toBe(0);
   });
 });
 
@@ -77,6 +102,93 @@ test.describe('parseTreeOid (unit)', () => {
   test('empty and undefined are null, never a false tree', () => {
     expect(parseTreeOid('')).toBeNull();
     expect(parseTreeOid(undefined)).toBeNull();
+  });
+});
+
+
+// The message table exists so a new verdict is a MISSING KEY rather than a silently-taken
+// else branch. That only holds if something checks it, so: enumerate every verdict assess
+// can actually produce across its whole input space, and require a template for each.
+test.describe('message table covers every verdict', () => {
+  const KINDS = new Set<string>();
+  for (const branch of ['main', 'feat/x']) {
+    for (const behind of [0, 3]) {
+      for (const contributes of [true, false]) {
+        for (const upstreamGone of [true, false]) {
+          const { code, kind } = assess({ branch, behind, contributes, upstreamGone });
+          if (code !== 0) KINDS.add(kind);
+        }
+      }
+    }
+  }
+
+  test('the enumeration actually found verdicts — control for the loop', () => {
+    // Without this, a bug that made assess always return ok would leave KINDS empty and
+    // the coverage test below would pass vacuously.
+    expect(KINDS.size).toBeGreaterThanOrEqual(3);
+  });
+
+  test('every failing verdict has a message template', () => {
+    for (const kind of KINDS) expect([...MESSAGES.keys()]).toContain(kind);
+  });
+
+  test('every template renders the branch, the count and both shas', () => {
+    for (const [kind, template] of MESSAGES) {
+      const out = template({ branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' });
+      expect(out).toContain('7');
+      expect(out).toContain('aaa1111');
+      expect(out).toContain('bbb2222');
+      // stale-main is about main itself, so it does not name a branch.
+      if (kind !== 'stale-main') expect(out).toContain('feat/zz');
+    }
+  });
+
+  // The two branch verdicts give OPPOSITE advice, and folding them together would force
+  // one of them to lie. Pin the distinction that justifies keeping them separate.
+  test('only spent-branch promises nothing is lost; deleted-upstream says look first', () => {
+    const ctx = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
+    expect(messageFor('spent-branch')!(ctx)).toContain('nothing is lost');
+    expect(messageFor('deleted-upstream')!(ctx)).not.toContain('nothing is lost');
+    expect(messageFor('deleted-upstream')!(ctx)).toContain('git log --oneline origin/main..HEAD');
+  });
+
+  // ⚠️ BORN FROM A REAL DEFECT (Codacy on #22, measured 2026-09-09). MESSAGES is now a
+  // Map, which has no prototype chain, so these keys CANNOT resolve — the test stays to
+  // pin that property, because a later refactor back to an object literal would silently
+  // reintroduce it. Historically the lookup was
+  // `MESSAGES[kind]` guarded by `if (!template)`, and four INHERITED keys defeat that:
+  // "constructor" is callable and yields "[object Object]", "toString" yields
+  // "[object Undefined]", "valueOf" and "__proto__" throw. The branch whose whole job is
+  // to report a missing template printed garbage or crashed instead.
+  //
+  // The property ASSUMED was "kind is a verdict"; the property TESTED was "kind indexes
+  // this object, prototype included". They agree on every value the other tests generate.
+  test('inherited keys are rejected, not treated as templates', () => {
+    for (const k of ['constructor', 'toString', 'valueOf', '__proto__', 'hasOwnProperty']) {
+      expect(messageFor(k)).toBeNull();
+    }
+  });
+
+  test('a real verdict still resolves — control, so the rejection is not blanket', () => {
+    expect(typeof messageFor('spent-branch')).toBe('function');
+    expect(messageFor('unknown-verdict')).toBeNull();
+  });
+
+  // Pins the reachability claim rather than asserting it in prose: assess() emits only
+  // these four strings, so no prototype key can reach the lookup in practice. If a future
+  // verdict is added, this fails and the coverage test above is what catches the message.
+  test('assess emits only literal verdict names', () => {
+    const kinds = new Set<string>();
+    for (const branch of ['main', 'feat/x']) {
+      for (const behind of [0, 3]) {
+        for (const contributes of [true, false]) {
+          for (const upstreamGone of [true, false]) {
+            kinds.add(assess({ branch, behind, contributes, upstreamGone }).kind);
+          }
+        }
+      }
+    }
+    expect([...kinds].sort()).toEqual(['deleted-upstream', 'ok', 'spent-branch', 'stale-main']);
   });
 });
 
@@ -208,5 +320,37 @@ test.describe('tree-freshness guard (end-to-end, real squash merge)', () => {
     expect(runGuard(repo)).toBe(1);
     git(repo, 'reset', '--hard', 'origin/main');
     expect(runGuard(repo)).toBe(0);
+  });
+
+  // ⚠️ THE DECAY CASE, reproducing what happened in this repository on 2026-09-09.
+  // merge-tree only sees "this branch is spent" until main edits the files the branch
+  // touched; after that, merging it WOULD change something, so it honestly reports
+  // "contributes" and the spent-branch rule goes quiet. In the real incident the edit was
+  // PR #21 rewriting check-tree-freshness.mjs — the guard's own fix blinded it to the
+  // branch that motivated it. The deleted-upstream signal does not decay.
+  test('a merged branch stays detected after main edits its files — via the deleted remote', () => {
+    // The gate deletes a branch when its PR lands.
+    execFileSync('git', ['push', 'origin', '--delete', 'chore/done'], { cwd: repo, stdio: 'ignore' });
+    // ...and main moves on THROUGH THE SAME FILE the branch introduced.
+    git(repo, 'checkout', 'main');
+    writeFileSync(join(repo, 'a.txt'), 'mainline rewrote this later\n');
+    git(repo, 'commit', '-am', 'rewrite a.txt on main');
+    git(repo, 'push', 'origin', 'main');
+
+    git(repo, 'checkout', 'chore/done');
+    execFileSync('git', ['fetch', '--quiet', 'origin'], { cwd: repo, stdio: 'ignore' });
+
+    // CONTROL: the old discriminator must now be BLIND, otherwise this test would pass
+    // for the wrong reason and prove nothing about the new signal.
+    let stdout = '';
+    try {
+      stdout = execFileSync('git', ['merge-tree', '--write-tree', 'origin/main', 'HEAD'],
+        { cwd: repo, encoding: 'utf8', stdio: ['ignore', 'pipe', 'pipe'] });
+    } catch (e: any) { stdout = e.stdout ?? ''; }
+    const mainTree = git(repo, 'rev-parse', 'origin/main^{tree}');
+    expect(parseTreeOid(stdout)).not.toBe(mainTree); // merge-tree now says "contributes"
+
+    // ...and the guard still catches it, on the deleted remote alone.
+    expect(runGuard(repo)).toBe(1);
   });
 });
