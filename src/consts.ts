@@ -43,8 +43,17 @@ export const SUPPORT: { label: string; href: string; note: string; live?: boolea
   { label: 'Ko-fi', href: 'https://ko-fi.com/thinkersjournal', note: 'One-time, no account needed', live: true },
   // Liberapay takes NO commission (verified 2026-09-08 at liberapay.com/about/faq); only the
   // processor's fee applies (~3% Stripe, ~5% PayPal). It's recurring-first, which is the one
-  // giving shape the other three don't cover. Handle `thinkersjournal` was unclaimed on
-  // 2026-09-08 (404; control: liberapay.com/Liberapay renders). Flip `live: true` once the
-  // account exists and the URL resolves.
-  { label: 'Liberapay', href: 'https://liberapay.com/thinkersjournal/', note: 'Recurring gifts · no platform cut' },
+  // giving shape the other three don't cover.
+  //
+  // The handle is `ThinkersJournal.com` — WITH the .com, which is part of the path, not a
+  // typo and not a domain. Links to /donate (the giving flow) rather than the profile, which
+  // is what the card's "Give →" promises.
+  //
+  // Liberapay also offers a button.js widget; we deliberately DON'T use it. Inspected
+  // 2026-09-08: it is a static yellow (#f6c915) Helvetica button emitted via document.write()
+  // — it shows no donation total, so it adds nothing this card doesn't, while costing a
+  // parser-blocking third-party script, a clash with the brand palette, and a permanent
+  // `script-src https://liberapay.com` widening of a CSP we intend to promote to enforcing.
+  // Their own <noscript> fallback is a plain link to this same URL.
+  { label: 'Liberapay', href: 'https://liberapay.com/ThinkersJournal.com/donate', note: 'Recurring gifts · no platform cut', live: true },
 ];
