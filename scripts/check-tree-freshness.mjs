@@ -43,14 +43,20 @@ import { pathToFileURL } from 'node:url';
 // The decision, isolated from git so it can be tested — see tests/freshness.spec.ts.
 // `behind` is how far origin/main is ahead of HEAD. `contributes` is whether merging
 // HEAD into origin/main would change anything at all.
-export function assess({ branch, behind, contributes }) {
+export function assess({ branch, behind, contributes, upstreamGone }) {
   if (branch === 'main') {
     return behind > 0 ? { code: 1, kind: 'stale-main' } : { code: 0, kind: 'ok' };
   }
-  // A branch is exempt because it carries unmerged work. If it contributes nothing, there
-  // is nothing to be behind FOR: it has merged, or it was cut and never committed to.
-  // Either way the tree is stale and the remedy is the same.
-  if (!contributes && behind > 0) return { code: 1, kind: 'spent-branch' };
+  // Being behind is the whole point of a branch; only a branch with no reason to exist
+  // is a problem.
+  if (behind === 0) return { code: 0, kind: 'ok' };
+  // Contributes nothing -> merged, or cut and never committed to. Nothing can be lost.
+  if (!contributes) return { code: 1, kind: 'spent-branch' };
+  // It contributes something, but its remote counterpart has been DELETED — which in this
+  // workflow means the PR merged and the branch was cleaned up. Distinct from the case
+  // above, because content that differs from main might be unpushed work, so this message
+  // must NOT promise that nothing is lost.
+  if (upstreamGone) return { code: 1, kind: 'deleted-upstream' };
   return { code: 0, kind: 'ok' };
 }
 
@@ -94,6 +100,44 @@ function headContributes() {
   return merged !== mainTree;
 }
 
+// Was this branch pushed once and then DELETED on the remote? In this workflow the merge
+// gate deletes a branch when its PR lands, so a vanished upstream is a durable "this
+// merged" signal — and unlike merge-tree it does NOT decay when main later edits the same
+// files. (Measured 2026-09-09: after #21 rewrote this very file, merge-tree correctly
+// reported that the already-merged chore/tree-freshness-guard now "contributes", because
+// merging it would revert #21. The guard's own fix is what blinded it to its own
+// motivating case. This signal is unaffected.)
+//
+// `branch.<name>.merge` survives remote deletion and proves the branch was pushed, which
+// is what separates "merged and cleaned up" from "never pushed, work still local".
+function upstreamDeleted(branch) {
+  // ⚠️ Look up the CONFIGURED upstream ref, not the local branch name. `git checkout -b
+  // x origin/main` sets branch.x.merge = refs/heads/main, so probing the remote for "x"
+  // finds nothing and would declare a perfectly live branch deleted — a false positive
+  // on the single most common way a branch is created here. Caught by the end-to-end
+  // conflict fixture, which is cut exactly that way.
+  let ref, remote;
+  try {
+    ref = execFileSync('git', ['config', '--get', `branch.${branch}.merge`], { encoding: 'utf8' }).trim();
+    remote = execFileSync('git', ['config', '--get', `branch.${branch}.remote`], { encoding: 'utf8' }).trim();
+  } catch {
+    return false; // never pushed / no tracking -> work may be purely local, stay quiet
+  }
+  if (!ref || !remote) return false;
+  // Tracking something OTHER than a branch of the same name (e.g. cut from origin/main)
+  // says nothing about this branch having been merged and cleaned up.
+  if (ref !== `refs/heads/${branch}`) return false;
+  try {
+    return execFileSync('git', ['ls-remote', '--heads', remote, ref],
+      { encoding: 'utf8', timeout: 10_000 }).trim() === '';
+  } catch {
+    // A read-only probe that could not run. Returning false only withholds an EXTRA
+    // warning; the primary merge-tree verdict is already computed, so this is not an
+    // unverified state being reported as verified.
+    return false;
+  }
+}
+
 // All the git probing, so main() stays decision + reporting.
 function probe() {
   let branch;
@@ -120,7 +164,8 @@ function probe() {
   }
   if (!Number.isInteger(behind)) notVerified('the commit count did not parse as a number.');
 
-  return { branch, behind, contributes: branch === 'main' ? true : headContributes() };
+  if (branch === 'main') return { branch, behind, contributes: true, upstreamGone: false };
+  return { branch, behind, contributes: headContributes(), upstreamGone: upstreamDeleted(branch) };
 }
 
 function report(kind, branch, behind) {
@@ -137,6 +182,23 @@ function report(kind, branch, behind) {
   green. Fast-forward before trusting any file read or commit list:
 
     git merge --ff-only origin/main
+`);
+    return;
+  }
+  if (kind === 'deleted-upstream') {
+    console.error(`
+  STALE TREE — '${branch}' no longer exists on the remote (it was pushed once and has
+  since been deleted, which here means its PR merged), while origin/main is ${behind}
+  commit(s) ahead.
+
+    HEAD         ${head}  (${branch})
+    origin/main  ${remote}
+
+  Unlike a branch that contributes nothing, this one still differs from origin/main — so
+  check before you leave, because the difference may be work you never pushed:
+
+    git log --oneline origin/main..HEAD
+    git checkout main && git merge --ff-only origin/main
 `);
     return;
   }
@@ -162,8 +224,8 @@ function report(kind, branch, behind) {
 // guard, fetch from origin, or call process.exit — a test that silently executed the
 // thing under test would be worse than no test.
 function main() {
-  const { branch, behind, contributes } = probe();
-  const { code, kind } = assess({ branch, behind, contributes });
+  const { branch, behind, contributes, upstreamGone } = probe();
+  const { code, kind } = assess({ branch, behind, contributes, upstreamGone });
   if (code === 0) process.exit(0);
   report(kind, branch, behind);
   process.exit(1);
