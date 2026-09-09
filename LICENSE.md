@@ -43,7 +43,16 @@ permission to use the name or the marks.
 
 ## Contributions
 
-Unless you explicitly state otherwise, any contribution intentionally submitted for
-inclusion in this work shall be licensed under the terms above that correspond to the
-material contributed — code under `MIT OR Apache-2.0`, dispatches under CC BY 4.0 —
-without any additional terms or conditions.
+Unless you explicitly state otherwise:
+
+- **Code** you contribute is licensed under `MIT OR Apache-2.0` — matching its outbound terms.
+- **Dispatches** you contribute are licensed under CC BY 4.0 — matching their outbound terms.
+- **Site copy and brand material** you contribute has *no* outbound terms to match, because
+  the project publishes it all rights reserved. You instead grant Thinker's Journal a
+  perpetual, worldwide, non-exclusive, irrevocable, royalty-free licence to use, reproduce,
+  modify, publish and distribute that contribution under whatever terms the project chooses.
+  You keep your own copyright in it.
+
+⚠️ Section 3 material is **outbound** unlicensed, not **inbound** unlicensed. Without the
+grant above, the project would have no right to publish prose that somebody contributed to
+it — the reserved-rights notice would lock out the project itself.
