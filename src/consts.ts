@@ -41,4 +41,10 @@ export const SUPPORT: { label: string; href: string; note: string; live?: boolea
   { label: 'Open Collective', href: 'https://opencollective.com/thinkersjournal', note: 'Transparent ledger · low fee', live: true },
   { label: 'GitHub Sponsors', href: 'https://github.com/sponsors/thinkersjournal', note: 'For the devs among us' },
   { label: 'Ko-fi', href: 'https://ko-fi.com/thinkersjournal', note: 'One-time, no account needed', live: true },
+  // Liberapay takes NO commission (verified 2026-09-08 at liberapay.com/about/faq); only the
+  // processor's fee applies (~3% Stripe, ~5% PayPal). It's recurring-first, which is the one
+  // giving shape the other three don't cover. Handle `thinkersjournal` was unclaimed on
+  // 2026-09-08 (404; control: liberapay.com/Liberapay renders). Flip `live: true` once the
+  // account exists and the URL resolves.
+  { label: 'Liberapay', href: 'https://liberapay.com/thinkersjournal/', note: 'Recurring gifts · no platform cut' },
 ];
