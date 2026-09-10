@@ -1,7 +1,7 @@
 import { test, expect } from '@playwright/test';
 // Unit tests for the /api/csp-report Pages Function. It only runs in the CF runtime, so
 // these exercise its logic in Node — the same pattern as subscribe-fn.spec.ts.
-import { onRequest, safeBlockedUri, summarise } from '../functions/api/csp-report.js';
+import { onRequest, safeBlockedUri, summarise, shouldLog, readCapped } from '../functions/api/csp-report.js';
 
 const post = (contentType: string | null, body: string) =>
   new Request('https://tj.test/api/csp-report', {
@@ -105,5 +105,77 @@ test.describe('CSP report redaction', () => {
     });
     expect(JSON.stringify(s)).not.toContain('private');
     expect(JSON.stringify(s)).not.toContain('document');
+  });
+});
+
+// ⚠️ THE THREE DEFECTS CODACY FOUND IN THE FIRST VERSION OF THIS SINK. Each was verified
+// exploitable before it was fixed, so these are born-red by observation, not by assertion.
+test.describe('CSP sink — the defects that were real', () => {
+  test('a newline in an opaque blocked-uri cannot forge a log line', () => {
+    const forged = 'inline\ncsp-violation directive=script-src blocked=TOTALLY-FAKE';
+    expect(safeBlockedUri(forged)).toBe('(redacted)');
+    // every control character, not just \n — a log is a text format and any of them
+    // can be a delimiter in one.
+    for (const c of ['\r', '\n', '\t', '\0', '\u2028']) {
+      expect(safeBlockedUri(`inline${c}x`), JSON.stringify(c)).toBe('(redacted)');
+    }
+  });
+
+  // Control: the whitelist must not be "redact everything", or the log is useless and
+  // the test above proves nothing.
+  test('the real opaque vocabulary still passes through', () => {
+    for (const v of ['inline', 'eval', 'data', 'blob', 'filesystem', 'wasm-eval']) {
+      expect(safeBlockedUri(v), v).toBe(v);
+    }
+    expect(safeBlockedUri('https://cdn.example.com/a/b.js?t=SECRET')).toBe('https://cdn.example.com');
+  });
+
+  test('an oversized body aborts the read instead of buffering it', async () => {
+    let pulled = 0;
+    let cancelled = false;
+    const CHUNK = new TextEncoder().encode('x'.repeat(4096));
+    const stream = new ReadableStream({
+      pull(c) { pulled += CHUNK.byteLength; c.enqueue(CHUNK); },
+      cancel() { cancelled = true; },
+    });
+    const req = new Request('https://tj.test/api/csp-report', {
+      method: 'POST',
+      headers: { 'content-type': 'application/csp-report' },
+      body: stream,
+      // @ts-expect-error - duplex is required for a streaming body in undici
+      duplex: 'half',
+    });
+    expect(await readCapped(req, 8192)).toBeNull();
+    expect(cancelled, 'the stream must be cancelled, not drained').toBe(true);
+    // Bounded by cap + at most one chunk — an unbounded body cannot exhaust the worker.
+    expect(pulled).toBeLessThanOrEqual(8192 + 4096);
+  });
+
+  test('an absent content-length does not become an unbounded read', async () => {
+    // This is the exact bypass: the old code checked the header, found none, and called
+    // .text() — buffering everything before the slice ever ran.
+    const body = 'x'.repeat(50_000);
+    const req = new Request('https://tj.test/api/csp-report', {
+      method: 'POST', headers: { 'content-type': 'application/csp-report' }, body,
+    });
+    expect(req.headers.get('content-length')).toBeNull();
+    expect(await readCapped(req, 8192)).toBeNull();
+  });
+
+  test('a body within the cap is returned intact', async () => {
+    const body = JSON.stringify({ 'csp-report': { 'effective-directive': 'script-src' } });
+    const req = new Request('https://tj.test/api/csp-report', {
+      method: 'POST', headers: { 'content-type': 'application/csp-report' }, body,
+    });
+    expect(await readCapped(req, 8192)).toBe(body);
+  });
+
+  test('sampling uses a CSPRNG and lands near its rate', () => {
+    let hits = 0;
+    for (let i = 0; i < 20_000; i++) if (shouldLog(10)) hits++;
+    expect(hits).toBeGreaterThan(1400);   // ~2000 expected; wide bounds, this is not a
+    expect(hits).toBeLessThan(2600);      // distribution test, only a wiring check
+    // oneIn=1 must log everything — the degenerate case a rate check can get backwards.
+    expect([...Array(200)].every(() => shouldLog(1))).toBe(true);
   });
 });

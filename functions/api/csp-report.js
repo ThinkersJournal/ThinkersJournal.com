@@ -35,18 +35,85 @@ const DIRECTIVE_RE = /^[a-z-]{1,40}$/;
 
 const noContent = () => new Response(null, { status: 204 });
 
-// Reduce a blocked URI to its ORIGIN, or to the scheme for opaque values like `inline`,
-// `eval` and `data`. The path is where the visitor-identifying detail lives, and we never
-// want it: "https://evil.example/a/b?token=..." becomes "https://evil.example".
+// Opaque blocked-uri values are a small closed vocabulary — "inline", "eval", "data",
+// "blob", "filesystem", "wasm-eval". Anything else in that position is not a value we
+// need, so this is a WHITELIST rather than an escape.
+//
+// ⚠️ Measured 2026-09-10: the previous version split on [/?#] and returned the remainder,
+// so "inline\ncsp-violation directive=script-src blocked=TOTALLY-FAKE" survived intact
+// and would have FORGED A SECOND LOG LINE. Stripping \r\n would have fixed that instance;
+// a whitelist fixes the class, because the log is a text format and every control
+// character is a potential delimiter in one. Note the URL branch was never affected —
+// the WHATWG parser strips tab/newline during parsing, verified with a control.
+const OPAQUE_RE = /^[a-z][a-z-]{0,29}$/;
+
 export function safeBlockedUri(raw) {
   const s = String(raw ?? '').slice(0, 200);
   if (!s) return '(none)';
-  if (!s.includes('://')) return s.split(/[/?#]/)[0].slice(0, 40); // inline | eval | data
+  if (!s.includes('://')) {
+    const token = s.split(/[/?#]/)[0].toLowerCase();
+    return OPAQUE_RE.test(token) ? token : '(redacted)';
+  }
   try {
-    return new URL(s).origin;
+    return new URL(s).origin.slice(0, 100);
   } catch {
     return '(unparseable)';
   }
+}
+
+// ⚠️ crypto, not Math.random. Sampling is not itself a security control — it is volume
+// reduction — and no oracle exists to learn the PRNG state from, because every request
+// gets the same 204. But that argument depends on constraint 4 continuing to hold, and a
+// CSPRNG costs nothing here, so the sampling should not have a hidden dependency on
+// another constraint's correctness. A PREDICTABLE SAMPLER LETS AN ATTACKER CHOOSE WHETHER
+// THEIR VIOLATIONS ARE RECORDED — flooding the log, or staying out of it.
+export function shouldLog(oneIn = SAMPLE_ONE_IN) {
+  const [n] = crypto.getRandomValues(new Uint32Array(1));
+  return (n / 2 ** 32) * oneIn < 1;
+}
+
+// Read at most `maxBytes`, ABORTING the stream rather than buffering and slicing.
+//
+// ⚠️ Measured 2026-09-10: the previous version checked `content-length` and then called
+// `request.text()`. When the header is ABSENT the check passes with declared=0, and
+// `.text()` buffers the WHOLE body before the slice ever runs — a 200 KB payload was
+// accepted against an 8 KB cap. A CAP APPLIED AFTER THE READ IS NOT A CAP, and the
+// comment above it claimed otherwise, which is the part that would have kept anyone from
+// looking. Returns null when the body is too large or unreadable.
+//
+// The bound is maxBytes PLUS AT MOST ONE CHUNK, not exactly maxBytes: the excess is only
+// detected after the chunk that crosses the line has arrived. Measured: 12,288 bytes
+// pulled with 4 KB chunks against an 8 KB cap, then cancel(). That is bounded, which is
+// the property that matters; stating it exactly avoids a later reader "fixing" a cap that
+// is not off by one.
+export async function readCapped(request, maxBytes) {
+  const declared = Number(request.headers.get('content-length') ?? NaN);
+  if (Number.isFinite(declared) && declared > maxBytes) return null;
+  if (!request.body) return '';
+  const reader = request.body.getReader();
+  const chunks = [];
+  let total = 0;
+  try {
+    for (;;) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      total += value.byteLength;
+      if (total > maxBytes) {
+        await reader.cancel();
+        return null;
+      }
+      chunks.push(value);
+    }
+  } catch {
+    return null;
+  }
+  const merged = new Uint8Array(total);
+  let at = 0;
+  for (const c of chunks) {
+    merged.set(c, at);
+    at += c.byteLength;
+  }
+  return new TextDecoder().decode(merged);
 }
 
 // Pull just the two fields worth logging out of either report shape — the legacy
@@ -68,14 +135,13 @@ export async function onRequestPost(context) {
   const ct = (request.headers.get('content-type') ?? '').split(';')[0].trim().toLowerCase();
   if (!REPORT_TYPES.includes(ct)) return new Response(null, { status: 405 });
 
-  // (3) sample BEFORE parsing, so the expensive path is the rare one.
-  if (Math.random() * SAMPLE_ONE_IN >= 1) return noContent();
+  // (3) sample BEFORE reading, so the expensive path is the rare one.
+  if (!shouldLog()) return noContent();
 
   try {
-    // (2) cap the body. Declared length is a hint, so the read is capped too.
-    const declared = Number(request.headers.get('content-length') ?? '0');
-    if (Number.isFinite(declared) && declared > MAX_BODY_BYTES) return noContent();
-    const text = (await request.text()).slice(0, MAX_BODY_BYTES);
+    // (2) cap the READ itself — an absent content-length must not become an unbounded read.
+    const text = await readCapped(request, MAX_BODY_BYTES);
+    if (text === null) return noContent();
 
     const summary = summarise(JSON.parse(text));
     // (6) directive + origin-only blocked URI. Never the raw report, never the document
