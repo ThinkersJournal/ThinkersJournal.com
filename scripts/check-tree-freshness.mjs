@@ -181,103 +181,155 @@ function probe() {
   return { branch, behind, contributes: headContributes(), upstreamGone: upstreamDeleted(branch) };
 }
 
+// ⚠️ A PRESCRIPTION IS A CLAIM ABOUT THE WORLD, AND EVERY CLAIM IN ONE MUST COME FROM A
+// MEASURED FIELD. This function exists because the fourth assumed-property-vs-tested-
+// property defect in this file was not in the detection at all — it was in the ADVICE.
+// The spent-branch message said "Nothing here is unmerged, so nothing is lost by
+// leaving", which is TRUE ABOUT COMMITS and says nothing about the working tree the
+// reader is looking at. Measured 2026-09-10: `git checkout main` then aborted with
+// "local changes would be overwritten", and a control run off the back of it silently
+// did not run. A TRUE STATEMENT ABOUT THE WRONG NOUN IS MORE DANGEROUS THAN A FALSE ONE,
+// BECAUSE IT SURVIVES CHECKING.
+//
+// So the advice is no longer prose baked into a template: it is computed from state that
+// was actually measured, and tested. A wrong prescription now needs a wrong FUNCTION,
+// which a test can reach, rather than a wrong SENTENCE, which no test can.
+export function remedy({ treeClean, mayHaveUnpushedWork }) {
+  // TWO independent ways work can be lost, and BOTH must be false before the reassurance
+  // is honest. This shape exists because the first fix checked only the first one: a
+  // shared prescription handed `deleted-upstream` a "nothing is lost" it must never give,
+  // since that verdict fires precisely when the branch still differs from origin/main and
+  // the difference may be commits that were never pushed. REMOVING AN UNCHECKED-CLAIM
+  // DEFECT FOR ONE PROPERTY CAN REINTRODUCE IT FOR ANOTHER; the test that pinned the
+  // spent-branch/deleted-upstream distinction is what caught it.
+  const safeToLeave = treeClean === true && mayHaveUnpushedWork !== true;
+  if (safeToLeave) {
+    return { safeToLeave, steps: ['git checkout main && git merge --ff-only origin/main'] };
+  }
+  const steps = [];
+  // Inspect BEFORE acting: if there may be unpushed commits, the first thing to run is the
+  // one that shows them. This lives here rather than in the deleted-upstream template
+  // because A PRESCRIPTION SHOULD BE COMPUTED, NOT PROSE — the same argument the rest of
+  // this file makes. Leaving it in the template produced the advice twice, once computed
+  // and once hand-written, which is what an incomplete migration looks like.
+  if (mayHaveUnpushedWork === true) {
+    steps.push('git log --oneline origin/main..HEAD   # what is here that main lacks');
+  }
+  if (treeClean !== true) {
+    steps.push('git stash -u                          # or commit them — either keeps the work');
+  }
+  steps.push('git checkout main && git merge --ff-only origin/main');
+  if (treeClean !== true) {
+    steps.push('git stash pop                         # back onto a current tree');
+  }
+  return { safeToLeave, steps };
+}
+
+function prescribe(ctx) {
+  const r = remedy(ctx);
+  const steps = r.steps.map((s) => '    ' + s).join('\n');
+  if (r.safeToLeave) {
+    return `  Nothing here is unmerged and the tree is clean, so nothing is lost by leaving:\n\n${steps}\n`;
+  }
+  const why = [];
+  if (ctx.treeClean !== true) {
+    why.push('    - you have UNCOMMITTED CHANGES in this tree');
+  }
+  if (ctx.mayHaveUnpushedWork === true) {
+    why.push('    - this branch still differs from origin/main, and the difference may be\n      commits that were never pushed');
+  }
+  return `  ⚠️ Check before you leave:\n\n${why.join('\n')}\n\n  The staleness is real either way — this is about the tree, not about your work:\n\n${steps}\n`;
+}
+
 // One template per verdict, keyed by the kind assess() returns. A table rather than an
 // if/else chain so the mapping is explicit and a verdict shipping WITHOUT a message is a
-// missing key instead of a silently-taken else branch — which matters, because this file
-// has now grown a third verdict and will grow more.
+// missing key instead of a silently-taken else branch.
 export const MESSAGES = new Map([
-  ['stale-main', ({ behind, head, remote }) => `
-  STALE TREE — local main is ${behind} commit(s) behind origin/main.
+  ['stale-main', (ctx) => `
+  STALE TREE — local main is ${ctx.behind} commit(s) behind origin/main.
 
-    HEAD         ${head}
-    origin/main  ${remote}
+    HEAD         ${ctx.head}
+    origin/main  ${ctx.remote}
 
   Every file you read from this tree is out of date, and ref checks will still look
   green. Fast-forward before trusting any file read or commit list:
 
-    git merge --ff-only origin/main
-`],
+${prescribe({ ...ctx, mayHaveUnpushedWork: false })}`],
 
-  ['spent-branch', ({ branch, behind, head, remote }) => `
-  STALE TREE — you are on '${branch}', which contributes NOTHING that origin/main does
-  not already have, while origin/main is ${behind} commit(s) ahead.
+  ['spent-branch', (ctx) => `
+  STALE TREE — you are on '${ctx.branch}', which contributes NOTHING that origin/main
+  does not already have, while origin/main is ${ctx.behind} commit(s) ahead.
 
-    HEAD         ${head}  (${branch})
-    origin/main  ${remote}
+    HEAD         ${ctx.head}  (${ctx.branch})
+    origin/main  ${ctx.remote}
 
   Two ways this happens, same consequence: the branch already merged (this repo squashes,
   so its commits are not ancestors of main and it still looks "unmerged" to
   git branch --merged), or it was cut and never committed to. Either way this tree is
-  missing ${behind} commit(s) of mainline work while every ref check reads green.
+  missing ${ctx.behind} commit(s) of mainline work while every ref check reads green.
 
-  Nothing here is unmerged, so nothing is lost by leaving:
+${prescribe({ ...ctx, mayHaveUnpushedWork: false })}`],
 
-    git checkout main && git merge --ff-only origin/main
-`],
-
-  ['deleted-upstream', ({ branch, behind, head, remote }) => `
-  STALE TREE — '${branch}' no longer exists on the remote (it was pushed once and has
-  since been deleted, which here means its PR merged), while origin/main is ${behind}
+  ['deleted-upstream', (ctx) => `
+  STALE TREE — '${ctx.branch}' no longer exists on the remote (it was pushed once and has
+  since been deleted, which here means its PR merged), while origin/main is ${ctx.behind}
   commit(s) ahead.
 
-    HEAD         ${head}  (${branch})
-    origin/main  ${remote}
+    HEAD         ${ctx.head}  (${ctx.branch})
+    origin/main  ${ctx.remote}
 
-  Unlike a branch that contributes nothing, this one still differs from origin/main — so
-  check before you leave, because the difference may be work you never pushed:
+  Unlike a branch that contributes nothing, this one still differs from origin/main.
 
-    git log --oneline origin/main..HEAD
-    git checkout main && git merge --ff-only origin/main
-`],
+${prescribe({ ...ctx, mayHaveUnpushedWork: true })}`],
 ]);
 
 // Look up a verdict's template.
 //
-// ⚠️ MESSAGES is a Map, not an object literal, and that is the whole point. The first
-// version indexed an object (`MESSAGES[kind]`) behind an `if (!template)` guard whose
-// comment claimed it caught unknown verdicts. Measured 2026-09-09, four INHERITED keys
-// walked straight through it, with FOUR DIFFERENT outcomes:
-//
-//   "constructor"  truthy, callable -> printed "[object Object]"
-//   "toString"     truthy, callable -> printed "[object Undefined]"
-//   "valueOf"      truthy           -> threw
-//   "__proto__"    truthy           -> threw
-//
-// So the branch that exists to report a missing template printed garbage on two keys and
-// crashed on two others — while correctly rejecting "no-such-verdict", the only case
-// anyone would have tested.
-//
-// `Object.hasOwn` fixes that, and a Map is better than fixing it: a Map has NO prototype
-// chain to inherit through, so the defect is IMPOSSIBLE rather than guarded, and there is
-// no dynamic property access left for anyone to have to reason about. This file has
-// produced three assumed-property-vs-tested-property bugs in one day; the right response
-// to the third is to remove the class, not to add a third guard.
+// MESSAGES is a Map, not an object literal, and that is the point: a Map has NO prototype
+// chain, so an inherited key ("constructor", "toString", "valueOf", "__proto__" — all
+// truthy, two of them callable) cannot resolve. That defect was real here on 2026-09-09;
+// this makes it impossible rather than guarded.
 export function messageFor(kind) {
   return MESSAGES.get(kind) ?? null;
 }
 
-function report(kind, branch, behind) {
-  const head = git('rev-parse', '--short', 'HEAD');
-  const remote = git('rev-parse', '--short', 'origin/main');
+function report(kind, ctx) {
   const template = messageFor(kind);
   if (!template) {
     // Unreachable while the tests hold: freshness.spec.ts enumerates every verdict
-    // assess() can produce and requires a template for each. Kept so a FUTURE verdict
-    // fails loudly rather than exiting 1 with no explanation.
+    // assess() can produce and requires a template for each.
     console.error(`\n  freshness: verdict '${kind}' has no message — that is a bug in this script.\n`);
     return;
   }
-  console.error(template({ branch, behind, head, remote }));
+  console.error(template(ctx));
 }
 
-// Wrapped so that IMPORTING this module for `assess`/`parseTreeOid` does not run the
-// guard, fetch from origin, or call process.exit — a test that silently executed the
+// Wrapped so that IMPORTING this module for `assess`/`parseTreeOid`/`remedy` does not run
+// the guard, fetch from origin, or call process.exit — a test that silently executed the
 // thing under test would be worse than no test.
 function main() {
   const { branch, behind, contributes, upstreamGone } = probe();
   const { code, kind } = assess({ branch, behind, contributes, upstreamGone });
   if (code === 0) process.exit(0);
-  report(kind, branch, behind);
+
+  // The working tree is measured HERE, not assumed by the message. It is the property the
+  // old advice silently depended on.
+  let treeClean;
+  try {
+    treeClean = git('status', '--porcelain') === '';
+  } catch {
+    // Unknown cleanliness -> take the CAUTIOUS branch. Claiming "nothing is lost" is the
+    // only outcome that can mislead; withholding the claim never can.
+    treeClean = false;
+  }
+
+  report(kind, {
+    branch,
+    behind,
+    treeClean,
+    head: git('rev-parse', '--short', 'HEAD'),
+    remote: git('rev-parse', '--short', 'origin/main'),
+  });
   process.exit(1);
 }
 
