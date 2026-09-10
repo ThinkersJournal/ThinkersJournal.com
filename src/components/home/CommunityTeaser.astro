@@ -6,7 +6,7 @@ import SectionLabel from '../SectionLabel.astro';
     <SectionLabel>The Community</SectionLabel>
     <h2>Soon: a place where your work comes alive.</h2>
     <p>Post about a bug and link the <em>exact</em> file, the exact lines, and the exact error — so a mentor can hover to see it, and click to jump in and help. Not "help, it's broken." Help, it's broken <em>right here.</em></p>
-    <p style="margin-top:22px"><a class="link" href="/community">See what we're building →</a></p>
+    <p class="more"><a class="link" href="/community">See what we're building →</a></p>
   </div>
   <div class="post">
     <div class="who"><div class="av"></div><div><b>maya_builds</b><span>2 hours ago · stuck on a deploy</span></div></div>
@@ -21,6 +21,7 @@ import SectionLabel from '../SectionLabel.astro';
   @media(max-width:860px){.inner{grid-template-columns:1fr;gap:34px}}
   h2{font-size:clamp(28px,4.2vw,44px);margin-top:14px}
   p{color:var(--muted);margin-top:18px;font-size:17px;max-width:52ch}
+  .more{margin-top:22px}
   .post{background:#0c0c10;border:1px solid var(--line);border-radius:16px;padding:22px;
     box-shadow:0 30px 70px -30px rgba(0,0,0,.8)}
   .who{display:flex;align-items:center;gap:11px}
