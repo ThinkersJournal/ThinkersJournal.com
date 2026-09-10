@@ -2,6 +2,16 @@
 
 Copyright (c) 2026 Thinker's Journal
 
+> **The holder is the organization, deliberately — not an oversight.** The founder's
+> reason, in his words: *"The copyright is under Thinker's Journal because the non-profit
+> organization should be the one owning its own items so that if I ever step down, sell
+> it, etc. everything transfers to whoever takes it over."*
+>
+> ⚠️ **Do not "correct" this to a personal name.** `/mission` is signed by the founder
+> while this line names the organization, and that asymmetry is intentional. The transfer
+> property is the point: an organization-held copyright survives a change of founder, a
+> personal one does not.
+
 This repository holds three different kinds of material under three different terms.
 
 ⚠️ Where code and prose share a file — page copy written inside an `.astro` component,
