@@ -1,9 +1,15 @@
 ---
-interface Props { size?: string }
-const { size = '21px' } = Astro.props;
+// Exactly two sizes are used on this site: 21px in the nav, 20px in the footer. They live
+// in this component's scoped CSS rather than in a `style="..."` attribute, because
+// style-src governs style ATTRIBUTES as well as <style> blocks — an arbitrary
+// `size` string would force 'unsafe-inline' to stay in the CSP permanently.
+// A new size is a new modifier here, which is the design-system-correct place for it.
+interface Props { size?: 'md' | 'sm' }
+const { size = 'md' } = Astro.props;
 ---
-<span class="wm" style={`font-size:${size}`}>Thinker's Journal<span class="dot" data-testid="wm-dot">.</span></span>
+<span class:list={['wm', size === 'sm' && 'wm--sm']}>Thinker's Journal<span class="dot" data-testid="wm-dot">.</span></span>
 <style>
-  .wm{font-family:var(--serif);font-weight:500;color:var(--head)}
+  .wm{font-family:var(--serif);font-weight:500;color:var(--head);font-size:21px}
+  .wm--sm{font-size:20px}
   .dot{color:var(--green);text-shadow:0 0 14px var(--green-glow)}
 </style>
