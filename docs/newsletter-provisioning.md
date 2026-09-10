@@ -34,8 +34,18 @@ Verify these against the Listmonk version you install; adjust the function if th
 5. **API user** — create a Listmonk API user with least privilege (subscribers: write);
    note its username + token.
 6. **List** — create the newsletter list with **opt-in = double**; note its numeric id.
-7. **Activate the form** — set these on the Cloudflare Pages project
-   (Settings → Environment variables; store the token as an encrypted secret):
+7. **Activate the form** — set these on the Cloudflare **Pages** project named
+   **`thinkersjournal-com`** (Settings → Environment variables; store the token as an
+   encrypted secret):
+
+   > ⚠️ **Do not use the Workers named `thinkersjournal-web` or `thinkersjournal-api`.**
+   > `thinkersjournal-web` reads like "the website" and is not: both Workers belong to the
+   > **Community** platform (`community.thinkersjournal.com`, a different repo). This site
+   > is a **Pages** project. Verified 2026-09-10 — `thinkersjournal-com.pages.dev` serves
+   > this site's title and a `www.thinkersjournal.com` canonical, while
+   > `community.thinkersjournal.com` serves "Discover — Thinker's Journal Community".
+   > Setting the four vars on a Worker leaves `/api/subscribe` reporting
+   > `configured: false` with nothing obviously wrong anywhere.
    - `LISTMONK_URL` — e.g. `https://list.thinkersjournal.com`
    - `LISTMONK_API_USER`
    - `LISTMONK_API_TOKEN` (secret)
