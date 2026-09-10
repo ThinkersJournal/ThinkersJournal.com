@@ -6,10 +6,16 @@
 # Content-Security-Policy, externalize or hash those inline scripts and confirm zero
 # violations in DevTools. Report-only cannot break the site; enforcing can, silently.
 #
-# No report-uri/report-to destination is set: violations surface in each visitor's console,
-# which is enough for the pre-enforcement verification this phase is for. Add a collector
-# (report-to + a Reporting-Endpoints header, or a service like Sentry) only if central
-# aggregation is wanted later — it is not required to promote this to an enforcing CSP.
+# Violations are reported to /api/csp-report, a Pages Function that logs a DIRECTIVE NAME
+# and an ORIGIN-ONLY blocked URI and persists nothing. See functions/api/csp-report.js
+# for the five constraints it is built to, and /privacy, which discloses the collection.
+#
+# BOTH `report-uri` and `report-to` are set, deliberately. `report-uri` is deprecated but
+# broadly supported; `report-to` is its replacement and needs the Reporting-Endpoints
+# header below. Per MDN (checked 2026-09-10): a browser that supports `report-to` IGNORES
+# `report-uri`, so the pair is a fallback and not double-reporting. A report you never
+# receive is indistinguishable from a violation that never happened, so the compatible
+# form is the safe one while the policy is still being observed.
 #
 # HSTS (Strict-Transport-Security) is intentionally NOT set here — it stays a Cloudflare
 # dashboard toggle (founder's call).
@@ -18,4 +24,5 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   Permissions-Policy: geolocation=(), microphone=(), camera=(), payment=(), usb=()
-  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; form-action 'self'
+  Reporting-Endpoints: csp-endpoint="/api/csp-report"
+  Content-Security-Policy-Report-Only: default-src 'self'; base-uri 'none'; object-src 'none'; frame-ancestors 'none'; img-src 'self' data:; script-src 'self'; style-src 'self' 'unsafe-inline'; font-src 'self'; connect-src 'self'; form-action 'self'; report-uri /api/csp-report; report-to csp-endpoint
