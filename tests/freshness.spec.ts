@@ -212,6 +212,49 @@ test.describe('message table covers every verdict', () => {
     expect(remedy({} as never).safeToLeave).toBe(false);
   });
 
+  // The inspection command moved OUT of the deleted-upstream template and INTO remedy,
+  // because having it in both produced the same advice twice — once computed, once
+  // hand-written, which is what an incomplete migration to computed advice looks like.
+  // These pin it so a future tidy-up cannot quietly drop the only step that shows a user
+  // what they are about to walk away from.
+  test('possible unpushed work always prescribes the command that reveals it', () => {
+    const steps = remedy({ treeClean: true, mayHaveUnpushedWork: true }).steps.join(' | ');
+    expect(steps).toContain('git log --oneline origin/main..HEAD');
+    // ...and it must come BEFORE the switch: inspect, then act.
+    const list = remedy({ treeClean: false, mayHaveUnpushedWork: true }).steps;
+    expect(list.findIndex((s) => s.includes('git log'))).toBeLessThan(
+      list.findIndex((s) => s.includes('git checkout main')));
+  });
+
+  test('no unpushed work means no inspection step — the advice is not boilerplate', () => {
+    for (const treeClean of [true, false]) {
+      expect(remedy({ treeClean, mayHaveUnpushedWork: false }).steps.join(' | '))
+        .not.toContain('git log --oneline');
+    }
+  });
+
+  test('deleted-upstream renders the inspection step in both tree states', () => {
+    const base = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
+    for (const treeClean of [true, false]) {
+      expect(messageFor('deleted-upstream')!({ ...base, treeClean }), `treeClean=${treeClean}`)
+        .toContain('git log --oneline origin/main..HEAD');
+    }
+  });
+
+  // The advice must appear ONCE. Two copies is what the duplication looked like.
+  test('no message prints the same command twice', () => {
+    const base = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
+    for (const [kind, template] of MESSAGES) {
+      for (const treeClean of [true, false]) {
+        const out = template({ ...base, treeClean });
+        for (const cmd of ['git log --oneline origin/main..HEAD', 'git checkout main && git merge --ff-only origin/main']) {
+          const n = out.split(cmd).length - 1;
+          expect(n, `${kind}/${treeClean} prints "${cmd}" ${n} times`).toBeLessThanOrEqual(1);
+        }
+      }
+    }
+  });
+
   // The distinction that survived the refactor and caught it breaking.
   test('deleted-upstream never promises nothing is lost, even on a clean tree', () => {
     const ctx = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222', treeClean: true };

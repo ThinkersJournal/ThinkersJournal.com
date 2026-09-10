@@ -207,12 +207,20 @@ export function remedy({ treeClean, mayHaveUnpushedWork }) {
     return { safeToLeave, steps: ['git checkout main && git merge --ff-only origin/main'] };
   }
   const steps = [];
+  // Inspect BEFORE acting: if there may be unpushed commits, the first thing to run is the
+  // one that shows them. This lives here rather than in the deleted-upstream template
+  // because A PRESCRIPTION SHOULD BE COMPUTED, NOT PROSE — the same argument the rest of
+  // this file makes. Leaving it in the template produced the advice twice, once computed
+  // and once hand-written, which is what an incomplete migration looks like.
+  if (mayHaveUnpushedWork === true) {
+    steps.push('git log --oneline origin/main..HEAD   # what is here that main lacks');
+  }
   if (treeClean !== true) {
-    steps.push('git stash -u                        # or commit them — either keeps the work');
+    steps.push('git stash -u                          # or commit them — either keeps the work');
   }
   steps.push('git checkout main && git merge --ff-only origin/main');
   if (treeClean !== true) {
-    steps.push('git stash pop                       # back onto a current tree');
+    steps.push('git stash pop                         # back onto a current tree');
   }
   return { safeToLeave, steps };
 }
@@ -270,10 +278,7 @@ ${prescribe({ ...ctx, mayHaveUnpushedWork: false })}`],
     HEAD         ${ctx.head}  (${ctx.branch})
     origin/main  ${ctx.remote}
 
-  Unlike a branch that contributes nothing, this one still differs from origin/main — so
-  check before you leave, because the difference may be work you never pushed:
-
-    git log --oneline origin/main..HEAD
+  Unlike a branch that contributes nothing, this one still differs from origin/main.
 
 ${prescribe({ ...ctx, mayHaveUnpushedWork: true })}`],
 ]);
