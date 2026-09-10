@@ -6,7 +6,7 @@ import { join, resolve } from 'node:path';
 // The tree-freshness guard. It shipped untested in PR #16 and its exemption hole was
 // found by a human walking into it — so the decision is pinned here, AND exercised
 // end-to-end against a real squash-merged repository.
-import { assess, parseTreeOid, MESSAGES, messageFor } from '../scripts/check-tree-freshness.mjs';
+import { assess, parseTreeOid, MESSAGES, messageFor, remedy } from '../scripts/check-tree-freshness.mjs';
 
 const GUARD = resolve('scripts/check-tree-freshness.mjs');
 
@@ -134,7 +134,7 @@ test.describe('message table covers every verdict', () => {
 
   test('every template renders the branch, the count and both shas', () => {
     for (const [kind, template] of MESSAGES) {
-      const out = template({ branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' });
+      const out = template({ branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222', treeClean: true });
       expect(out).toContain('7');
       expect(out).toContain('aaa1111');
       expect(out).toContain('bbb2222');
@@ -146,10 +146,77 @@ test.describe('message table covers every verdict', () => {
   // The two branch verdicts give OPPOSITE advice, and folding them together would force
   // one of them to lie. Pin the distinction that justifies keeping them separate.
   test('only spent-branch promises nothing is lost; deleted-upstream says look first', () => {
-    const ctx = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
+    const ctx = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222', treeClean: true };
     expect(messageFor('spent-branch')!(ctx)).toContain('nothing is lost');
     expect(messageFor('deleted-upstream')!(ctx)).not.toContain('nothing is lost');
     expect(messageFor('deleted-upstream')!(ctx)).toContain('git log --oneline origin/main..HEAD');
+  });
+
+  // ⚠️ THE CLASS-LEVEL TEST, not an instance test. The fourth assumed-property defect in
+  // this script was in the ADVICE: "nothing is lost by leaving" is true about COMMITS and
+  // silent about the WORKING TREE, and a reader with uncommitted work is not positioned to
+  // notice the substitution. So rather than fixing that one sentence, this enumerates
+  // EVERY message against BOTH tree states and pins the claim to the measured field.
+  // A future message that hardcodes the reassurance fails here.
+  test('no message claims "nothing is lost" unless the tree was measured clean', () => {
+    const base = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
+    for (const [kind, template] of MESSAGES) {
+      expect(template({ ...base, treeClean: false }), `${kind} with a dirty tree`)
+        .not.toContain('nothing is lost');
+      expect(template({ ...base, treeClean: false }), `${kind} must warn instead`)
+        .toContain('UNCOMMITTED CHANGES');
+    }
+  });
+
+  test('every message still prescribes something actionable in both states', () => {
+    const base = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222' };
+    for (const [kind, template] of MESSAGES) {
+      for (const treeClean of [true, false]) {
+        expect(template({ ...base, treeClean }), `${kind}/${treeClean}`)
+          .toContain('git merge --ff-only origin/main');
+      }
+    }
+  });
+
+  // remedy is safe ONLY when BOTH ways of losing work are ruled out. The truth table is
+  // pinned rather than sampled, because the FIRST version of this fix checked one property
+  // and silently reintroduced the defect for the other: a shared prescription handed
+  // `deleted-upstream` a "nothing is lost" it must never give.
+  test('remedy is safe only when the tree is clean AND nothing may be unpushed', () => {
+    const cases: [boolean, boolean, boolean][] = [
+      // treeClean, mayHaveUnpushedWork, expected safeToLeave
+      [true, false, true],
+      [true, true, false],
+      [false, false, false],
+      [false, true, false],
+    ];
+    for (const [treeClean, mayHaveUnpushedWork, expected] of cases) {
+      expect(remedy({ treeClean, mayHaveUnpushedWork }).safeToLeave,
+        `clean=${treeClean} unpushed=${mayHaveUnpushedWork}`).toBe(expected);
+    }
+  });
+
+  test('a dirty tree gets stash/pop around the switch; other states do not', () => {
+    expect(remedy({ treeClean: true, mayHaveUnpushedWork: false }).steps).toHaveLength(1);
+    const dirty = remedy({ treeClean: false, mayHaveUnpushedWork: false }).steps.join(' | ');
+    expect(dirty).toContain('git stash');
+    expect(dirty).toContain('git stash pop');
+    // An unpushed-work warning alone must NOT invent stash steps — the tree is clean.
+    expect(remedy({ treeClean: true, mayHaveUnpushedWork: true }).steps.join(' | '))
+      .not.toContain('git stash');
+  });
+
+  // Unmeasured state takes the cautious branch either way: withholding the reassurance can
+  // never mislead, giving it wrongly can. Mirrors main()'s catch around git status.
+  test('unmeasured properties are treated as unsafe, not as safe', () => {
+    expect(remedy({} as never).safeToLeave).toBe(false);
+  });
+
+  // The distinction that survived the refactor and caught it breaking.
+  test('deleted-upstream never promises nothing is lost, even on a clean tree', () => {
+    const ctx = { branch: 'feat/zz', behind: 7, head: 'aaa1111', remote: 'bbb2222', treeClean: true };
+    expect(messageFor('deleted-upstream')!(ctx)).not.toContain('nothing is lost');
+    expect(messageFor('spent-branch')!(ctx)).toContain('nothing is lost');
   });
 
   // ⚠️ BORN FROM A REAL DEFECT (Codacy on #22, measured 2026-09-09). MESSAGES is now a
