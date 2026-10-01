@@ -9,8 +9,16 @@ export const SITE = {
 
 // The Community platform (project ②) lives at community.thinkersjournal.com.
 // It's pre-launch, so `live: false` keeps its links OFF this site (no dead links) —
-// the same discipline as SUPPORT below. Flip to `true` once the app is deployed and
-// resolving; that single change lights up the nav "Sign in" link and the /community CTA.
+// the same discipline as SUPPORT below.
+//
+// ⚠️ DO NOT flip to `true` on domain-resolution alone — that trigger has been satisfied since
+// 2026-09-02 and this comment used to say exactly that, which was a real risk: this flip is
+// CireSnave's own ruling (board item 89, 2026-10-01) for when Community "officially" opens to
+// users, and he's separately ruled that automated CSAM/NCMEC reporting MUST exist on Community
+// before that happens (board item 76 / ThinkersJournal/community#114, resolved). Flip only once
+// #114 has shipped AND the app is deployed and resolving — both, not either. Confirm #114's
+// status in ThinkersJournal/community before touching this.
+// That single change lights up the nav "Sign in" link and the /community CTA.
 // The entry URLs derive from one origin constant so a host change can't leave them out of sync.
 const APP_ORIGIN = 'https://community.thinkersjournal.com';
 export const APP = {
