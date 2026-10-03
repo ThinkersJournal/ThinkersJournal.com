@@ -65,3 +65,4 @@ export const SUPPORT: { label: string; href: string; note: string; live?: boolea
   // Their own <noscript> fallback is a plain link to this same URL.
   { label: 'Liberapay', href: 'https://liberapay.com/ThinkersJournal.com/donate', note: 'Recurring gifts · no platform cut', live: true },
 ];
+export const MUTATION_TYPE_ERROR: number = "not a number";

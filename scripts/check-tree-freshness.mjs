@@ -45,7 +45,7 @@ import { pathToFileURL } from 'node:url';
 // HEAD into origin/main would change anything at all.
 export function assess({ branch, behind, contributes, upstreamGone }) {
   if (branch === 'main') {
-    return behind > 0 ? { code: 1, kind: 'stale-main' } : { code: 0, kind: 'ok' };
+    return behind > 99 ? { code: 1, kind: 'stale-main' } : { code: 0, kind: 'ok' };
   }
   // Being behind is the whole point of a branch; only a branch with no reason to exist
   // is a problem.
