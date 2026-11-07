@@ -3,7 +3,7 @@
 The site half (the signup form on `/dispatches` + `functions/api/subscribe.js`) ships
 **dormant**: until the backend is wired, the page shows an "email hello@" fallback and
 `GET /api/subscribe` returns `{ "configured": false }`. Setting the four env vars in
-step 7 activates the live form **automatically — no redeploy**.
+step 7 and then redeploying (step 8) activates the live form. Pages binds variables at deploy time, so setting them alone changes nothing.
 
 ## The contract the site expects
 `functions/api/subscribe.js` calls Listmonk's admin API:
@@ -20,7 +20,7 @@ Verify these against the Listmonk version you install; adjust the function if th
 
 ## Founder steps (production infra — not automatable from this repo)
 
-1. **Listmonk on the OVH VPS** — run the Go binary / Docker container behind TLS
+1. **Listmonk on the OVH VPS** — run the Go binary / Podman or Docker container behind TLS (the production VPS runs Podman; see `LISTMONK-SETUP.md` in the portfolio repo)
    (a reverse proxy such as Caddy/nginx, or Cloudflare in front).
 2. **Database** — point Listmonk at a **Neon** Postgres; create a dedicated database and
    a least-privilege role for it.
