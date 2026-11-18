@@ -26,7 +26,7 @@ Cloudflare Pages Functions for the parts that need a server.
 
 ## Getting started
 
-You need the Node version in `.nvmrc` (22.16.0).
+You need the Node version in `.nvmrc` (22.x, at least 22.23.4).
 
 ```sh
 npm ci
