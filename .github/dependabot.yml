@@ -7,3 +7,8 @@ updates:
     groups:
       npm-all:
         patterns: ["*"]
+    ignore:
+      # @astrojs/check 0.9.x peers typescript ^5 || ^6; v7 breaks `npm ci` (ERESOLVE, #47).
+      # Drop this once @astrojs/check accepts typescript 7.
+      - dependency-name: "typescript"
+        update-types: ["version-update:semver-major"]
