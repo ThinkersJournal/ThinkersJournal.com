@@ -109,6 +109,10 @@ In `src/consts.ts`, set `APP.live` to `true`. That one change adds the nav "Sign
 the "Open the Community" call to action. Only flip it once `community.thinkersjournal.com`
 is ready for public signups.
 
+**Launch checklist (pm-web ruling, 2026-11-19):** before `APP.live` goes `true`, the flip step reads the
+*deployed* community pipeline (the CSAM/NCMEC reporting from community#114 is live and resolving),
+not a repo constant or this file. The claim is unverified from this repo; no test can check it.
+
 ## Further documentation
 
 | Topic | Where |
